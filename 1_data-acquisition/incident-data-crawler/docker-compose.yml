@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  weather-data-crawler:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: incident-data-crawler:latest
+    environment:
+      URL: 'https://data.traffic.hereapi.com/v7/incidents?in=corridor:BF-usmJsw6jDyD8b7gBiQ_T0X7bsF7W4Z_YuV_JgsBoJiejC2nBzXkRtaoDtQmgBtG-c_YyWhjB53BhenhBuLvWY3lCpOtyBlRvzB3P1nBnEvkB2F5awVhQyXpTVtUyS1KwayI4jBxI8gBrF4U0JqToD8biQua8MuQieukByI4Pie;r=200&locationReferencing=shape&apiKey=JIUsw_yv74ZgPfWx7o2hEOAFSRlfowYf4csuKetOzRc'
+      INTERVAL: 360000
+    volumes:
+      - ./data:/data

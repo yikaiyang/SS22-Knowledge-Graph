@@ -1,0 +1,7 @@
+flexpolyline>=0.1.0
+torch
+matplotlib
+pandas
+pykeen
+neo4j
+plotly

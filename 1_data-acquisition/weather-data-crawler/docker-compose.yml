@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  weather-data-crawler:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: weather-data-crawler:latest
+    environment:
+      URL: 'https://api.openweathermap.org/data/2.5/weather?lat=48.210033&lon=16.363449&appid=76ae72a1581cf8cd5d618189d6c745f4'
+      API_KEY: 'JIUsw_yv74ZgPfWx7o2hEOAFSRlfowYf4csuKetOzRc'
+      INTERVAL: 360000
+    volumes:
+      - ./data:/data
