@@ -7,7 +7,7 @@ import re
 # 2) Deduplicates multiple entries by using the first entry
 
 # Folder location 
-folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/weather/'
+folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/incidents'
 files = [f for f in listdir(folderPath) if isfile(join(folderPath, f)) and not '.DS_Store' in f ]
 
 print(files)

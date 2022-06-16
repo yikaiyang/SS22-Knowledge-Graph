@@ -23,14 +23,17 @@ The following examplary HTTP Request shows a query to retrieve the traffic data 
 ```
 https://data.traffic.hereapi.com/v7/flow?in=circle:48.189101,16.338981;r=2000&locationReferencing=olr
 ```
-Similarly to the paper by Tan et. al. the observed area was restricted to a specific corridor in order to reduce the scope of the modeled road network. A road with high traffic fluctuation during different daytime hours was then selected. (in the Paper: Fifth Ring Road of Beijing, in this exercise: Gürtelstrasse of the City of Vienna) 
+Similarly to the paper by Tan et. al. the observed area was restricted to a specific corridor in order to reduce the scope of the modeled road network. A road with high traffic fluctuation during different daytime hours was then selected. (in the Paper: Fifth Ring Road of Beijing, in this exercise: Gürtelstrasse / Donaukanal of the City of Vienna) 
 
-Using the website "geojson.io" [GeoJSON](https://geojson.io/#map=2/20.0/0.0) a path was manually drawn that resembles the outline of the outer "ring" road of the City of Vienna and it's path extracted as a file in the GEOJSON format. To ensure compatibility with the Here Maps REST API the encoded pathway is then converted into the Flexible-Polyline encoding. [Flex-Polyline](https://github.com/heremaps/flexible-polyline)
+Using the website "geojson.io" [GeoJSON](https://geojson.io/#map=2/20.0/0.0) a path was manually drawn that resembles the outline of the outer "ring" road of the city of Vienna and it's path extracted as a file in the GEOJSON format. To ensure compatibility with the Here Maps REST API the encoded pathway is then converted into the Flexible-Polyline encoding. [Flex-Polyline](https://github.com/heremaps/flexible-polyline)
 
 The pathway shown graphically:
 ![Selected Road](/documents/map_area/map_area.png)
+*Pathway of streets where traffic data collection is envisioned*
 
-The pathway encoded in GEOJSON encoding:
+
+<br/>
+The pathway encoded in GEOJSON encoding
 
 <details>
   <summary>Click to reveal</summary>
@@ -364,14 +367,22 @@ The pathway encoded in Flexible-Polyline encoding:
 BF-usmJsw6jDyD8b7gBiQ_T0X7bsF7W4Z_YuV_JgsBoJiejC2nBzXkRtaoDtQmgBtG-c_YyWhjB53BhenhBuLvWY3lCpOtyBlRvzB3P1nBnEvkB2F5awVhQyXpTVtUyS1KwayI4jBxI8gBrF4U0JqToD8biQua8MuQieukByI4Pie
 ```
 
-The following request queries the traffic flow information of the viennese outer "ring" road. (Gürtel - Donaukanalstrasse - Gürtel):
+The following request queries the traffic flow information of the viennese outer "ring" road. (Gürtel - Donaukanalstrasse - Gürtel) and all streets in the perimeter of 200 meters:
 
 To access API resource the GEOJSON string has to be converted as FlexPolyPoint string.
 ```
 https://data.traffic.hereapi.com/v7/flow?in=corridor:BF-usmJsw6jDyD8b7gBiQ_T0X7bsF7W4Z_YuV_JgsBoJiejC2nBzXkRtaoDtQmgBtG-c_YyWhjB53BhenhBuLvWY3lCpOtyBlRvzB3P1nBnEvkB2F5awVhQyXpTVtUyS1KwayI4jBxI8gBrF4U0JqToD8biQua8MuQieukByI4Pie;r=200&locationReferencing=shape&apiKey={YOUR_API_KEY}
 ```
+
+The returning HTTP response contains the data about the traffic situation of all street points (blue dots) at the time of the request depicted in the following figure:
+
+![Ontology of this project](/documents/map_area/street_collection_points.png)
+*Traffic data of all street points in blue are collected*
+
+
+
 ### Road Incident Data
-Road incidents can be queried by the service HERE MAPS 
+Road incident data can be queried by the service HERE MAPS as well. 
 
 
 ### Collection Timespan
@@ -388,21 +399,14 @@ The script ```/documents/match_date_column.py``` adjusts the time value, as afor
 ## 2. Knowledge Graph Construction
 The structure of the ontology is derived from the ontology presented in the paper by Tan et. al. However, some adjustments were made to incorporate weather and incident data.
 
-
 ![Ontology by Tan et al.](/documents/ontology_graphic/ontology_paper.png)
 *Fig.2: Original Ontology by Tan et al.*
 
 ![Ontology of this project](/documents/ontology_graphic/ontology.png)
 *Modified Ontology used in this exercise submission*
 
-For storing the entities and relationships in the ontology the graph database system Neo4J ([https://neo4j.com](https://neo4j.com)) was selected.
-
-
-## 3. Training: Embeddings
-To train the embedding model the python package pykg2vec from the library pytorch is used: https://analyticsindiamag.com/pykg2vec/
-### 3.1. Modelling time
-
-For training the dataset, it was initially planned to use TransE / TransD embeddings, as used by the authors of the paper. However, the method used by the study authors raises some concerns. Due to the time-dependent nature of the data, especially in the transportation domain, e.g. with the traffic situation changing at different times of the day, time must be modelled or represented in the knowledge graph. The authors applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges.
+### 2.1. Modelling Time
+Due to the time-dependent nature of the data, especially in the transportation domain where the traffic situation is highly dynamic and based on the time of observation, time must be modelled or represented in the knowledge graph. The authors applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges. However, the modelling method used by the study authors raises some concerns.
 
 The construction using this method can be done in following ways (which one the study authors were using is unclear):
 
@@ -414,15 +418,23 @@ Let's suppose that there are two entities of type street: Street 1 and Street 2.
 ![Ontology_example_1](/documents/ontology_graphic/concrete_ontology_example_1.png)
 *Example of a concrete ontology where invalid relationships are introduced.*
 
-
-2) Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that (a high number of) duplicates will be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. 14:00). Thus, the loss of semantic similarity in the notion of time could play a role on how the predictions of KG embeddings turn out.
+2) Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that nodes will be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time-associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. multiple nodes with the value 14:00). Thus, the loss of semantics of time could play a role on how the predictions of KG embeddings turn out.
 
 ![Ontology_example_2](/documents/ontology_graphic/concrete_ontology_example_2.png)
 *Example of a concrete ontology where an entity is created for each timestamp. Time entities are not connected to each other.*
 
 Since time dependent data is quite common, this area has been already researched and the optimal solution would be to use Knowledge Graph Embeddings specialized on Temporal Knowledge Graphs instead. Such as T-TransE, which would be able to preserve temporal consistency.
 
+## Creating road network
+A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have entailed additional data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets. For every street the nearest 25 streets were computed, while only every i*5-th nearest street (for i < 25) was taken. The background for applying this method is that it counteracts the formation of clusters, such that only streets that are very close are connected, while streets in farther distances can not be reached. Obviously, constructing a road network using this method does not yield an accurate or correct representation of the real street network, and will introduce and leave out many street connections which exist in the real world.  
 
+![Ontology_example_2](/documents/map_area/street_network.jpg)
+*Graph visualization of the street network produced by the approximation method*
+
+## 3. Training: Embeddings
+To train the embedding model the python package pykg2vec from the library PyTorch is used: https://analyticsindiamag.com/pykg2vec/
+
+For training the dataset, it was initially planned to use TransE / TransD embeddings, as used by the authors of the paper.
 
 ## Results
 
