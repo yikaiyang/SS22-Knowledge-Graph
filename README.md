@@ -7,6 +7,9 @@ The paper “Research on the Construction of a Knowledge Graph and Knowledge Rea
 
 In contrast to the proposal and for time constraint reasons, the construction of the public transit network graph was left out. Since it's only purpose was to demonstrate the use-case of "finding the shortest path between two stations" using a Cypher query, it also wouldn't have added a lot of value to the exercise in the context of this class, which is more focused on the reasoning side.
 
+## Method
+
+
 ## 1. Data acquisition
 For this task, data from four different data resources, 
 1. Road traffic data (aka. Road congestion data)
@@ -406,9 +409,9 @@ The structure of the ontology is derived from the ontology presented in the pape
 *Modified Ontology used in this exercise submission*
 
 ### 2.1. Modelling Time
-Due to the time-dependent nature of the data, especially in the transportation domain where the traffic situation is highly dynamic and based on the time of observation, time must be modelled or represented in the knowledge graph. The authors applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges. However, the modelling method used by the study authors raises some concerns.
+Due to the time-dependent nature of the data, especially in the transportation domain where the traffic situation is highly dynamic and changes based on the time of observation, time must be modelled or represented in the knowledge graph. The authors applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges. However, the modelling method used by the study authors raises some concerns.
 
-The construction using this method can be done in following ways (which one the study authors were using is unclear):
+The construction using this method can be done in the following ways (which one the study authors were using is unclear):
 
 1) Method 1: Creation of date and time vertices only once, so that there are no duplicates of a timestamp in the entire knowledge graph, and create relationships between the entities associated with the timestamp. However, by using this approach, the information of the initial relationship chain between entities is lost, since now all entities associated with a specific time are also in relation to each other.
 <br/> <br/>
@@ -421,13 +424,18 @@ Let's suppose that there are two entities of type street: Street 1 and Street 2.
 2) Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that nodes will be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time-associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. multiple nodes with the value 14:00). Thus, the loss of semantics of time could play a role on how the predictions of KG embeddings turn out.
 
 ![Ontology_example_2](/documents/ontology_graphic/concrete_ontology_example_2.png)
-*Example of a concrete ontology where an entity is created for each timestamp. Time entities are not connected to each other.*
+*Example of a concrete ontology where an entity is created for each timestamp. Time entities, which represent the same time are not connected to each other.*
 
-Since time dependent data is quite common, this area has been already researched and the optimal solution would be to use Knowledge Graph Embeddings specialized on Temporal Knowledge Graphs instead. Such as T-TransE, which would be able to preserve temporal consistency.
+Since time dependent data is quite common in datasets, this area has been already researched and the optimal solution would likely be to use Knowledge Graph Embeddings specialized on temporal facts instead. Such as HyTE, which would be able to preserve temporal consistency. By using this method, the modelling of the ontology would change accordingly, as distinctive entities for representing time are not needed anymore, as seen in the following figure:
 
-## Creating road network
-A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have entailed additional data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets. For every street the nearest 25 streets were computed, while only every i*5-th nearest street (for i < 25) was taken. The background for applying this method is that it counteracts the formation of clusters, such that only streets that are very close are connected, while streets in farther distances can not be reached. Obviously, constructing a road network using this method does not yield an accurate or correct representation of the real street network, and will introduce and leave out many street connections which exist in the real world.  
+![Ontology_example_3](/documents/ontology_graphic/ontology-temporal.png)
+*Remodeled ontology with time entities removed by using incorporating time as an attribute in the relationships itself*
 
+Based on those observations and the fact that the relationship between the road entities and time entities is called 'road_date', it may can be implicitly assumed that the study authors have used method 2. Still, due to the large amounts of edges and nodes that would be needed to be created by using method 2, and the incurred higher processing power and hardware needs, it was decided to use method 1 for this exercise.
+
+## Road Network Creation
+
+A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have entailed additional data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets. For every street the nearest 25 streets were computed, while only every i*5-th nearest street (for i < 25) was taken. The background for applying this method is that it counteracts the formation of clusters, such that only streets that are very close are connected while streets in farther distances can not be reached. Obviously, constructing a road network using this method does not yield an accurate or correct representation of the real street network, and will create new and leave out many street connections which exist or do not exist in the real world.
 ![Ontology_example_2](/documents/map_area/street_network.jpg)
 *Graph visualization of the street network produced by the approximation method*
 
@@ -435,6 +443,10 @@ A road network can be represented as a graph (V,E), where V (vertices) equals ro
 To train the embedding model the python package pykg2vec from the library PyTorch is used: https://analyticsindiamag.com/pykg2vec/
 
 For training the dataset, it was initially planned to use TransE / TransD embeddings, as used by the authors of the paper.
+
+|Entities   |Triplets   |Relationships |Training Set   |Test Set   |Validation Set   |
+|---|---|---|---|---|---|
+|33157   |44343   |   |   |   |   |
 
 ## Results
 

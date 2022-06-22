@@ -32,3 +32,5 @@ replay_pid*
 **/crawled_unprocessed_data/**
 
 *.bkp
+
+**/triples/**
