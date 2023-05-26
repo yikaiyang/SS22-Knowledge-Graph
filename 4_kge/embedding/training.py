@@ -16,13 +16,13 @@ optimizer = Adam(params=model.get_grad_params())
 
 # Pick a training approach (sLCWA or LCWA)
 training_loop = SLCWATrainingLoop(
-    model=model, 
+    model=model,
     triples_factory = training_triples_factory,
     optimizer=optimizer
 )
 training_loop.train(
     triples_factory=training_triples_factory,
-    num_epochs=5, 
+    num_epochs=5,
     batch_size=256)
 
 evaluator = RankBasedEvaluator()

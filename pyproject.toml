@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ss22-knowledge-graph"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "ss22_knowledge_graph"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flexpolyline = ">=0.1.0"
+torch = "^2.0.1"
+matplotlib = "^3.7.1"
+pandas = "^2.0.1"
+pykeen = "^1.10.1"
+neo4j = "^5.8.1"
+plotly = "^5.14.1"
+haversine = "^2.8.0"
+tqdm = "^4.65.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

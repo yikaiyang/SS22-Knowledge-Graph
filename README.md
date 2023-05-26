@@ -380,7 +380,7 @@ https://data.traffic.hereapi.com/v7/flow?in=corridor:BF-usmJsw6jDyD8b7gBiQ_T0X7b
 The returning HTTP response contains the data about the traffic situation of all street points (blue dots) at the time of the request depicted in the following figure:
 
 ![Ontology of this project](/documents/map_area/street_collection_points.png)
-*Traffic data of all street points in blue are collected*
+*Traffic data of all locations colored in blue are collected*
 
 
 

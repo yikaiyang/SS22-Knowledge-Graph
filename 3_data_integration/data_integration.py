@@ -5,7 +5,6 @@ from dateutil import parser
 from datetime import datetime, timedelta
 
 class Neo4JIntegration:
-
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
@@ -13,14 +12,14 @@ class Neo4JIntegration:
         self.driver.close()
 
     def createEntities(self):
-        self.loadIncidents()
+        #self.loadIncidents()
         self.loadRoads()
-        self.loadDateAndTime()
-        self.loadWeather()
+        # self.loadDateAndTime()
+        # self.loadWeather()
 
     #region Create incidents
     def loadIncidents(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/incidents/processed'
+        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/data/incidents/'
         files = Neo4JIntegration._getFilesOfDir(folderPath)
         for file in files:
             filePath = os.path.join(folderPath,file)
@@ -378,8 +377,8 @@ class Neo4JIntegration:
         return files
 
 
-if __name__ == "__main__":
-    connection = Neo4JIntegration("bolt://localhost:7687", "neo4j", "kgtransport")
-    connection.createEntities()
-    connection.createRelationships()
-    connection.close()
+# if __name__ == "__main__":
+#     connection = Neo4JIntegration("bolt://localhost:7687", "neo4j", "kgtransport")
+#     connection.createEntities()
+#     connection.createRelationships()
+#     connection.close()
