@@ -3,6 +3,10 @@ import pandas as pd
 import os
 from dateutil import parser
 from datetime import datetime, timedelta
+from pathlib import Path
+from tqdm import tqdm
+
+working_dir = Path(__file__).parent.parent
 
 class Neo4JIntegration:
     def __init__(self, uri, user, password):
@@ -11,29 +15,36 @@ class Neo4JIntegration:
     def close(self):
         self.driver.close()
 
+    def delete_db(self):
+        self.driver.execute_query(
+            """
+             MATCH (n)
+             DETACH DELETE n
+            """
+        )
+
     def createEntities(self):
-        #self.loadIncidents()
+        self.loadIncidents()
         self.loadRoads()
-        # self.loadDateAndTime()
-        # self.loadWeather()
+        self.loadDateAndTime()
+        self.loadWeather()
 
     #region Create incidents
     def loadIncidents(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/data/incidents/'
+        folderPath = os.path.join(working_dir, 'data/incidents')
         files = Neo4JIntegration._getFilesOfDir(folderPath)
         for file in files:
             filePath = os.path.join(folderPath,file)
-            print(filePath)
             incidentsDF = pd.read_csv(filePath, delimiter=';')
-            for index, incident in incidentsDF.iterrows():
-                print(incident["IncidentType"])
+            for index, incident in tqdm(incidentsDF.iterrows()):
+                #t.set_description(f"Processing incident: {incident['IncidentType']}")
                 with self.driver.session() as session:
                     session.write_transaction(self._create_incident, incident)
     
 
     @staticmethod
     def _create_incident(tx, incident):
-        print(f"Creating incident {incident['IncidentType']} criticality: {incident['Criticality']}")
+        #print(f"Creating incident {incident['IncidentType']} criticality: {incident['Criticality']}")
         incidentType = incident["IncidentType"]
         criticality = incident["Criticality"]
         timestamp = incident["Timestamp"]
@@ -69,13 +80,14 @@ class Neo4JIntegration:
         return result
     #endregion
 
-    #region Create Roads
+    #region Create roads
     def loadRoads(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/traffic/processed'
+        folderPath = os.path.join(working_dir, 'data/traffic')
         files = Neo4JIntegration._getFilesOfDir(folderPath)
-        for file in files:
+        for file in (t := tqdm(files)):
             filePath = os.path.join(folderPath,file)
-            print(filePath)
+            t.set_description(f"Creating DB entry for: {filePath}")
+
             roadsDF = pd.read_csv(filePath, delimiter=';', encoding="utf-8")
             roadsDF = roadsDF.drop_duplicates(subset=['Street', 'Length', 'CenterLatitude', 'CenterLongitude'])
            
@@ -86,7 +98,7 @@ class Neo4JIntegration:
 
     @staticmethod
     def _create_road(tx, road):
-        print(f"Creating road {road['Street']}")
+        #print(f"Creating road {road['Street']}")
         streetName = road["Street"]
         length = road["Length"]
         name = f"{streetName}-{length}"
@@ -111,24 +123,22 @@ class Neo4JIntegration:
     
     #region Create weather
     def loadWeather(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/weather/processed'
+        folderPath = os.path.join(working_dir, 'data/weather')
         files = Neo4JIntegration._getFilesOfDir(folderPath)
         for file in files:
             filePath = os.path.join(folderPath,file)
-            print(filePath)
             weatherDF = pd.read_csv(filePath, delimiter=';')
-            print(weatherDF.columns.tolist())
-            for index, weather in weatherDF.iterrows():
-                print(weather["Temp"])
+            for index, weather in (t := tqdm(weatherDF.iterrows())):
+                t.set_description(f"Processing {weather['Temp']}")
                 with self.driver.session() as session:
                     session.write_transaction(self._create_weather, weather)
 
     @staticmethod
     def _create_weather(tx, weatherObject):
-        print(f"Creating weather: {weatherObject['Weather']}")
+        #print(f"Creating weather: {weatherObject['Weather']}")
         weather = weatherObject["Weather"]
-        latitude = weatherObject["Latitude"]
-        longitude = weatherObject["Longitude"]
+        latitude = weatherObject["CenterLatitude"]
+        longitude = weatherObject["CenterLongitude"]
         temp = weatherObject["Temp"]
         timestamp = weatherObject["Timestamp"]
         time = parser.parse(timestamp)
@@ -139,7 +149,7 @@ class Neo4JIntegration:
         year = time.year
 
         stmt = f"""
-            MERGE d: DateTime
+            MERGE (d: DateTime
                 {{
                     name: '{day}-{month}-{year} {hour}:{minute}',
                     hour: {hour},
@@ -181,7 +191,7 @@ class Neo4JIntegration:
 
     @staticmethod
     def _create_date_and_time(tx, date):
-        print(f"Creating date and time: {date}")
+        #print(f"Creating date and time: {date}")
         
         hour = date.hour
         minute = date.minute
@@ -212,21 +222,21 @@ class Neo4JIntegration:
         self.load_road_traffic_situation()
 
     def load_incident_rel(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/incidents/processed'
+        folderPath = os.path.join(working_dir, 'data/incidents')
         files = Neo4JIntegration._getFilesOfDir(folderPath)
         for file in files:
             filePath = os.path.join(folderPath,file)
-            print(filePath)
+            #print(filePath)
             incidentsDF = pd.read_csv(filePath, delimiter=';')
-            print(incidentsDF.columns.tolist())
-            for index, incident in incidentsDF.iterrows():
-                print(incident["IncidentType"])
+            #print(incidentsDF.columns.tolist())
+            for index, incident in tqdm(incidentsDF.iterrows()):
+                #print(incident["IncidentType"])
                 with self.driver.session() as session:
                     session.write_transaction(self._create_incident_relationship, incident)
     
     @staticmethod
     def _create_incident_relationship(tx, incident):
-        print(f"Creating relationships for incident: {incident['IncidentType']}")
+        #print(f"Creating relationships for incident: {incident['IncidentType']}")
         incidentType = incident["IncidentType"]
         criticality = incident["Criticality"]
         timestamp = incident["Timestamp"]
@@ -272,7 +282,7 @@ class Neo4JIntegration:
             {merge_clauses_incident_street_stmt}
             RETURN i;
         """
-        print(stmt)
+        #print(stmt)
         result = tx.run(stmt)
         return result
 
@@ -280,53 +290,56 @@ class Neo4JIntegration:
     #region Road Network
     #### Road relationship (r:Road)-[:IS_CONNECTED]->(r2:Road)
     def load_road_network(self):
-        filePath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/roads_list/roads_list.csv'
+        filePath = os.path.join(working_dir, 'data/roads_list.csv')
         roadsDF = pd.read_csv(filePath, delimiter=';')
-        for index, road in roadsDF.iterrows():
+        for index, road in tqdm(roadsDF.iterrows()):
             with self.driver.session() as session:
                 session.write_transaction(self._create_road_network_relationship, road)
 
-
-
     @staticmethod
     def _create_road_network_relationship(tx, road):
-        print(f"Creating nearby roads for: {road}")
+        #print(f"Creating nearby roads for: {road}")
         name = road["Street"]
         length = road["Length"]
         road_key = f"{name}-{length}"
-        nearbyStreetsString = road["NearestStreets"]
-        nearbyStreets = (nearbyStreetsString).split(',')
+        try:
+            nearbyStreetsString = road["NearestStreets"]
+            nearbyStreets = (nearbyStreetsString).split(',')
+    
+            match_clauses = [f"(r{i}:Road {{ name: '{x}'}})" for i,x in enumerate(nearbyStreets)]
+            match_clauses.append(f"(r:Road {{ name: '{road_key}'}})" )
+            match_clauses_stmt = ','.join(match_clauses)
 
-        match_clauses = [f"(r{i}:Road {{ name: '{x}'}})" for i,x in enumerate(nearbyStreets)]
-        match_clauses.append(f"(r:Road {{ name: '{road_key}'}})" )
-        match_clauses_stmt = ','.join(match_clauses)
+            merge_clauses_road_street = [f"""
+                MERGE (r)<-[:IS_CONNECTED]-(r{i})
+            """ for i,x in enumerate(nearbyStreets)]
 
-        merge_clauses_road_street = [f"""
-            MERGE (r)<-[:IS_CONNECTED]-(r{i})
-        """ for i,x in enumerate(nearbyStreets)]
+            merge_clauses_roads_stmt = ''.join(merge_clauses_road_street)
 
-        merge_clauses_roads_stmt = ''.join(merge_clauses_road_street)
-
-        stmt = f"""
-            MATCH {
-                match_clauses_stmt
-            }
-            {merge_clauses_roads_stmt}
-            RETURN r;
-        """
-        print(stmt)
-        result = tx.run(stmt)
-        return result
+            stmt = f"""
+                MATCH {
+                    match_clauses_stmt
+                }
+                {merge_clauses_roads_stmt}
+                RETURN r;
+            """
+            #print(stmt)
+            result = tx.run(stmt)
+            return result
+        except:
+            return None
     #endregion
 
     
     #region Create road traffic situation relationships
     def load_road_traffic_situation(self):
-        folderPath = '/Users/yikaiyang/Projects/SS22-Knowledge-Graph/documents/data/traffic/processed'
+        folderPath = os.path.join(working_dir, 'data/traffic')
         files = Neo4JIntegration._getFilesOfDir(folderPath)
-        for file in files:
+        for file in (t:=tqdm(files)):
+            t.set_description(f"Creating relationship: Traffic situation: {file}")
+
             filePath = os.path.join(folderPath,file)
-            print(filePath)
+            #print(filePath)
             roadsDF = pd.read_csv(filePath, delimiter=';')
             for index, road in roadsDF.iterrows():
                 with self.driver.session() as session:
@@ -334,12 +347,12 @@ class Neo4JIntegration:
 
     @staticmethod
     def _create_road_traffic_situation_rel(tx, road):
-        print(f"Creating road <-> traffic situation relationship: {road}")
+        #print(f"Creating road <-> traffic situation relationship: {road}")
         name = road["Street"]
         length = road["Length"]
         road_key = f"{name}-{length}"
         
-        speedUncapped = road["SpeedUncapped"]
+        speedUncapped = road["Speed"]
         jamFactor = road["JamFactor"]
         timestamp = road["Timestamp"]
         time = parser.parse(timestamp)
@@ -366,7 +379,7 @@ class Neo4JIntegration:
             MERGE (t)<-[:HAS_TRAFFIC_SITUATION]-(d)
             RETURN r;
         """
-        print(stmt)
+        #print(stmt)
         result = tx.run(stmt)
         return result
     #endregion
@@ -375,10 +388,3 @@ class Neo4JIntegration:
     def _getFilesOfDir(dir_path):
         files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and not f == '.DS_Store']
         return files
-
-
-# if __name__ == "__main__":
-#     connection = Neo4JIntegration("bolt://localhost:7687", "neo4j", "kgtransport")
-#     connection.createEntities()
-#     connection.createRelationships()
-#     connection.close()

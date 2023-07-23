@@ -17,16 +17,16 @@ def add_nearby_roads_to_roads_file():
     # Folder location
     working_dir = Path(__file__).parent.parent.parent
 
-    folderPath = os.path.join(working_dir,
-                              'data/traffic/')
+    folderPaths = ['data/traffic', 'data/incidents', 'data/weather']
     roadsListFile = os.path.join(working_dir,
                                  'data/roads_list.csv')
-
     files = []
-    for f in listdir(folderPath):
-        if isfile(join(folderPath, f)) and not '.DS_Store' in f:
-            if not f.startswith('_roads_list'):
-                files.append(f)
+
+    for fo in folderPaths:
+        folderPath = os.path.join(working_dir, fo)
+        for f in listdir(folderPath):
+            if isfile(join(folderPath, f)) and not '.DS_Store' in f:
+                files.append(join(folderPath, f))
 
     resultDF = pd.DataFrame()
     roadsDF = pd.read_csv(roadsListFile, sep=";")
@@ -35,7 +35,8 @@ def add_nearby_roads_to_roads_file():
 
     for file in tqdm(files):
         try:
-            path = os.path.join(folderPath, file)
+             # path = os.path.join(folderPath, file)
+            path = file
             #print(path)
 
             nearest_streets_df_list = []
