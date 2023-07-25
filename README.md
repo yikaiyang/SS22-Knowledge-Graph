@@ -442,17 +442,48 @@ A road network can be represented as a graph (V,E), where V (vertices) equals ro
 ## 3. Training: Embeddings
 To train the embedding model the python package pykg2vec from the library PyTorch is used: https://analyticsindiamag.com/pykg2vec/
 
-For training the dataset, it was initially planned to use TransE / TransD embeddings, as used by the authors of the paper.
+For the training of the dataset, it was initially planned to use the same KG models, as used by the authors of the paper: TransE, TransH, TransD.
 
-|Entities   |Triplets   |Relationships |Training Set   |Test Set   |Validation Set   |
-|---|---|---|---|---|---|
-|33157   |44343   |   |   |   |   |
+|Entities   |Triplets   |Relationships |
+|---|---|---|
+|2571   |18610   |6   |
 
 ## Results
 
+<h3>Head Entity Prediction (Epochs=125)</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransE   |39.38   |76.09%   |64.91%   |49.19%   |
+|**TransH**   |**10.35**   |73.56%   |68.81%   |**53.20%**  |
+|**TransD**   |11.09   |**81.16%**   |**69.37%**   |52.12%   |
+
+---
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|**RotatE**   |10.25   |83.18%   |75.17%   |**64.37%**   |
+
+----
+<h3>Tail Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransE   |46.98  |46.98  |45.62%   |27.29%   |
+|TransH   |17.55   |65.39%   |52.87%   |39.23%  |
+|**TransD**   |**16.37**   |**81.16%**   |**69.37%**   |**52.12%**   |
+
+---
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|RotatE   |14.55   |74.02%   |58.28%   |45.43%   |
 
 ## Conclusion
 
+
+|Input (Head & Relationship)   |Predicted Tails   |Desired Outcome |
+|---|---|---|
+   |39.38   |76.09%   |
+|**TransH**   |**10.35**   |73.56%   |
 
 ## Technical Architecture
 The technologies used for this exercise submission consist of:
