@@ -22,8 +22,8 @@ def add_nearby_roads_to_roads_file():
                                  'data/roads_list.csv')
     files = []
 
-    for fo in folderPaths:
-        folderPath = os.path.join(working_dir, fo)
+    for folder in folderPaths:
+        folderPath = os.path.join(working_dir, folder)
         for f in listdir(folderPath):
             if isfile(join(folderPath, f)) and not '.DS_Store' in f:
                 files.append(join(folderPath, f))

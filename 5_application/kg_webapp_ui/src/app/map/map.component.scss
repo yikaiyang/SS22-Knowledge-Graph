@@ -1,0 +1,16 @@
+mgl-map {
+    position: absolute;
+    height: 100%;
+    width: 100%
+}
+
+::ng-deep .marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: grey;
+    color: white;
+    box-shadow: 4px 4px 4px 0 rgba(226,226,226,0.50);
+    z-index: 701;
+}

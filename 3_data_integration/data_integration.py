@@ -28,6 +28,7 @@ class Neo4JIntegration:
         self.loadRoads()
         self.loadDateAndTime()
         self.loadWeather()
+        self.load_poi()
 
     #region Create incidents
     def loadIncidents(self):
@@ -375,7 +376,6 @@ class Neo4JIntegration:
                     year: {year}
                 }}
             )
-            MERGE (r)<-[:IS_NEARBY]-(t) 
             MERGE (t)<-[:HAS_TRAFFIC_SITUATION]-(d)
             RETURN r;
         """
@@ -383,6 +383,59 @@ class Neo4JIntegration:
         result = tx.run(stmt)
         return result
     #endregion
+
+    def load_poi(self):
+        ## TODO LOAD Poi
+        POI_FILE_PATH = 'data/poi/poi.csv'
+        filePath = os.path.join(working_dir,POI_FILE_PATH)
+        #print(filePath)
+        df = pd.read_csv(filePath, delimiter=';')
+        for index, item in (t:=tqdm(df.iterrows())):
+            t.set_description(f"Creating POI: {item['Name']}")
+            with self.driver.session() as session:
+                session.write_transaction(self._create_poi, item)
+
+    @staticmethod
+    def _create_poi(tx, poi):
+        name = poi['Name']
+        latitude = poi['CenterLatitude']
+        longitude = poi['CenterLongitude']
+        category = poi['Category']
+
+        try:
+            nearbyStreetsString = poi["NearestStreets"] 
+            nearbyStreets = (nearbyStreetsString).split(',')
+    
+            match_clauses = [f"(r{i}:Road {{ name: '{x}'}})" for i,x in enumerate(nearbyStreets)]
+            match_clauses_stmt = ','.join(match_clauses)
+
+            merge_clauses_road_street = [f"""
+                MERGE (p)-[:IS_LOCATED]->(r{i})
+            """ for i,x in enumerate(nearbyStreets)]
+
+            merge_clauses_roads_stmt = ''.join(merge_clauses_road_street)
+
+            stmt = f"""
+                MATCH {
+                    match_clauses_stmt
+                }
+                MERGE (p: POI 
+                    {{ 
+                        name: '{name}',
+                        latitude: {latitude},
+                        longitude: {longitude},
+                        category: '{category}'
+                    }}
+                )
+                {merge_clauses_roads_stmt}
+                RETURN p;
+            """
+            #print(stmt)
+            result = tx.run(stmt)
+            return result
+        except:
+            return None
+        
 
     @staticmethod
     def _getFilesOfDir(dir_path):

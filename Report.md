@@ -379,6 +379,33 @@ https://data.traffic.hereapi.com/v7/flow?in=corridor:BF-usmJsw6jDyD8b7gBiQ_T0X7b
 
 The returning HTTP response contains the data about the traffic situation of all street points (blue dots) at the time of the request depicted in the following figure:
 
+#### *Points of interests*
+Using the Foursquare API, a list of the top 50 most relevant locations of each of the following POI categories were fetched:
+
+
+<ul>
+    <li>Primary School</li>
+    <li>Secondary School</li>
+    <li>High School</li>
+    <li>Middle School</li>
+    <li>Private School</li>
+    <li>Amusement Park</li>
+    <li>Transportation service</li>
+    <li>Bus station</li>
+    <li>Train station</li>
+    <li>Metro Station</li>
+    <li>Tram Station</li>
+    <li>Transportation services</li>
+    <li>Public Transporation</li>
+</ul>
+
+For reference the API is documented at the following website: https://location.foursquare.com/places/docs/categories 
+
+
+
+
+
+
 ![Ontology of this project](/documents/map_area/street_collection_points.png)
 *Traffic data of all locations colored in blue are collected*
 
@@ -390,6 +417,10 @@ Road incident data can be queried by the service HERE MAPS as well.
 
 ### Collection Timespan
 The data was collected over the timespan of 7 days from Fri, May 6th 2022 - 14:00 to Fri, May 13th 2022 - 17:00 using automated queries in a fixed time-interval of 20 minutes. Due to technical difficulties the data collection from the Traffic Incidents API started at a later time on Tue, March 10 16:45. Thus, the traffic incidents dataset is incomplete since it does not cover the full data collection time period of the other data ressources which may introduce a Bias during the training phase of the embedding model. To accommodate this issue, a second batch of data was created by letting the scripts continuing running unti Wed, May 18th 21:00.
+
+### Points of Interest
+Similarly, to the paper POIs were collected. 
+https://location.foursquare.com/places/docs/categories 
 
 ### Data processing
 Since there is an individual script for querying each REST ressource, and each script were manually invoked, there is a discrepancy in the collected timestamps of each dataset. (e.g. 11:21 in the traffic dataset , while the traffic incident dataset has 11:24, due to the script starting 3 minutes later) However, since it is required to combine the different datasets to enable reasoning over the relationships of the different datasets, the timestamps were rounded to the next timestamp in full 20 minutes steps. (E.g. 13:32 -> 13:40, and 13:28 -> 13:20)
@@ -435,7 +466,8 @@ Based on those observations and the fact that the relationship between the road 
 
 ## Road Network Creation
 
-A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have entailed additional data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets. For every street the nearest 25 streets were computed, while only every i*5-th nearest street (for i < 25) was taken. The background for applying this method is that it counteracts the formation of clusters, such that only streets that are very close are connected while streets in farther distances can not be reached. Obviously, constructing a road network using this method does not yield an accurate or correct representation of the real street network, and will create new and leave out many street connections which exist or do not exist in the real world.
+A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have taken additional time for data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets. For every street the nearest 25 streets were computed, while only every i*5-th nearest street (for i < 25) was linked. The idea for applying this method is that it counteracts the formation of large disconnected clusters, such that only streets that are very close are connected to each other, while streets in farther distances can not be reached. Obviously, constructing an artificial road network like this will not yield an accurate or correct representation of the real street network, and may distort the results of prediction tasks when applied to Knowledge Graph Embeddings.
+
 ![Ontology_example_2](/documents/map_area/street_network.jpg)
 *Graph visualization of the street network produced by the approximation method*
 
@@ -444,46 +476,74 @@ To train the embedding model the python package pykg2vec from the library PyTorc
 
 For the training of the dataset, it was initially planned to use the same KG models, as used by the authors of the paper: TransE, TransH, TransD.
 
-|Entities   |Triplets   |Relationships |
-|---|---|---|
-|2571   |18610   |6   |
+| Entities | Triplets | Relationships |
+| -------- | -------- | ------------- |
+| 2989     | 14066    | 7             |
 
 ## Results
 
-<h3>Head Entity Prediction (Epochs=125)</h3>
+<h3>Head Entity Prediction (Epochs: n=500)</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransE   |39.38   |76.09%   |64.91%   |49.19%   |
-|**TransH**   |**10.35**   |73.56%   |68.81%   |**53.20%**  |
-|**TransD**   |11.09   |**81.16%**   |**69.37%**   |52.12%   |
-
----
-|Model   |MR   |hits@10 |hits@3 | hits@1|
-|---|---|---|---|---|
-|**RotatE**   |10.25   |83.18%   |75.17%   |**64.37%**   |
-
-----
+|TransD   |13.252884388980457   |76.64%   |53.92%   |22.37%   |
+|TransE   |28.977866729456085   |69.60%   |51.14%   |35.06%   |
+|**TransH**   |10.66352719566753   |**77.96%**   |**64.35%**   |**48.36%**   |
+|RotatE   |20.88697904403108   |69.11%   |45.26%   |31.01%   |
 <h3>Tail Entity Prediction</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransE   |46.98  |46.98  |45.62%   |27.29%   |
-|TransH   |17.55   |65.39%   |52.87%   |39.23%  |
-|**TransD**   |**16.37**   |**81.16%**   |**69.37%**   |**52.12%**   |
+|TransD   |**17.16246762420532**   |66.02%   |50.25%   |17.42%   |
+|TransE   |31.28890981869555   |56.65%   |34.64%   |19.31%   |
+|TransH   |17.67247468801507   |**64.61%**   |**50.39%**   |**37.96%**   |
+|RotatE   |25.74476100777019   |59.52%   |42.45%   |29.79%   |
 
----
+<hr/>
+
+<h3>Head Entity Prediction (Epochs: n=1000)</h3>
+
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|RotatE   |14.55   |74.02%   |58.28%   |45.43%   |
+|TransD   |13.72992700729927   |75.32%   |52.25%   |16.03%   |
+|TransE   |30.178714386625852   |63.74%   |41.89%   |24.44%   |
+|**TransH**   |**10.157758417706617**   |**78.24%**   |**65.29%**   |**50.60%**   |
+|RotatE   |49.13397692488816   |53.78%   |34.99%   |25.52%   |
+<h3>Tail Entity Prediction</h3>
 
-## Conclusion
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |17.727336943724982   |**65.39%**   |47.26%   |10.81%   |
+|TransE   |35.58629620908877   |52.79%   |32.63%   |18.01%   |
+|**TransH**   |**16.661643513068046**   |65.20%   |**49.02%**   |**38.83%**   |
+|RotatE   |56.456793030374385   |49.35%   |30.33%   |17.78%   |
+
+<hr/>
+
+<h3>Head Entity Prediction (Epochs: n= 2000)</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |13.464092300447374   |76.15%   |51.57%   |12.41%   |
+|TransE   |36.23757946785967   |60.63%   |36.45%   |18.93%   |
+|**TransH**   |**10.497763126913116**   |**76.92%**   |**64.63%**   |**49.80%**   |
+|RotatE   |106.3312926771839   |38.26%   |24.53%   |17.75%   |
+<h3>Tail Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |17.358370614551447   |65.43%   |46.22%   |9.28%   |
+|TransE   |39.20367318106899   |47.59%   |27.20%   |15.80%   |
+|**TransH**   |**16.955733458912174**   |**63.74%**   |**51.28%**   |**38.12%**   |
+|RotatE   |115.26465740522723   |33.25%   |16.74%   |8.15%   |
+
+## Interpretation
+In contra
 
 
-|Input (Head & Relationship)   |Predicted Tails   |Desired Outcome |
-|---|---|---|
-   |39.38   |76.09%   |
-|**TransH**   |**10.35**   |73.56%   |
+
+
+and the fact that most KGE models are transductive
 
 ## Technical Architecture
 The technologies used for this exercise submission consist of:

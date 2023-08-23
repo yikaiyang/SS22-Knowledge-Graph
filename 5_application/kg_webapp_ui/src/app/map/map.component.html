@@ -1,0 +1,13 @@
+<mgl-map
+  [style]="'mapbox://styles/mapbox/streets-v9'"
+  [zoom]="[12]"
+  [center]="[16.36, 48.21]"
+>
+    <mgl-marker
+        *ngFor="let location of locations"
+        [lngLat]="[location.longitude, location.latitude]"
+    >
+        <div class="marker">
+        </div>
+    </mgl-marker>
+</mgl-map>

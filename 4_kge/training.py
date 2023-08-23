@@ -11,18 +11,28 @@ from pykeen.utils import set_random_seed
 
 set_random_seed(0)
 
+
 tf = TriplesFactory.from_path_binary('/Users/yikaiyang/Projects/SS22-Knowledge-Graph/4_kge/triples')
 working_dir = Path(__file__).parent
 
-def train(models = ['TransE']):
+EPOCHS = 2000
+MODELS = ['TransE', 'TransH', 'TransD', 'RotatE']
+
+def train(epochs=EPOCHS, models=MODELS):
     for model in models:
-        training, testing = tf.split()
+        training, testing = tf.split(
+            random_state=0
+        )
         print(training)
         result = pipeline(
             training=training,
             testing=testing,
             model=model,
-            epochs=128,  # short epochs for testing - you should go higher
+            model_kwargs=dict(
+                random_seed=0
+            ),
+            epochs=epochs,  # short epochs for testing - you should go higher
+            random_seed=0
         )
         print(result)
         # result_path = os.path.join(working_dir, model)
@@ -37,7 +47,7 @@ def train(models = ['TransE']):
     # # Pick an optimizer from Torch
     # optimizer = Adam(params=model.get_grad_params())
 
-    # # Pick a training approach (sLCWA or LCWA)
+    # # Pick a training approach (sLCWA or LCWA) 
     # training_loop = SLCWATrainingLoop(
     #     model=model,
     #     triples_factory = training_triples_factory,
@@ -55,4 +65,4 @@ def train(models = ['TransE']):
     # results = evaluator.evaluate(model, mapped_triples, batch_size=1024)
     # print(results)
 
-train(models=['TransE', 'TransH', 'TransD', 'RotatE'])
+#train(models=['TransE', 'TransH', 'TransD', 'RotatE'])

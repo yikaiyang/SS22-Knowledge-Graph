@@ -1,0 +1,12 @@
+<p-tabMenu [activeItem]="active_category"
+    [model]="categories">
+    <ng-template pTemplate="item" let-item let-i="index">
+        <div (click)="onTabItemClick(i)">
+            <span>
+              <i class="{{ item.icon }}"></i>
+            </span>
+            {{ item.label }}
+          </div>
+    </ng-template>
+</p-tabMenu>
+<app-map></app-map>
