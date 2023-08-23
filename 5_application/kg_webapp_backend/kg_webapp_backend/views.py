@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from models.poi import POI
-# from models.road import Road
+from models.road import Road
 # from models.incident import Incident
 
 class GetPOINodes(APIView):
@@ -26,23 +26,23 @@ class GetPOINodes(APIView):
         return Response(data)
     
 
-# class GetRoadNodes(APIView):
-#     def get(self, request):
-#         count_info = {
-#             #'node_type': request.GET.get('t', 'Entity'),
-#             'limit': request.GET.get('limit', ''),
-#         }
+class GetRoadNodes(APIView):
+    def get(self, request):
+        count_info = {
+            #'node_type': request.GET.get('t', 'Entity'),
+            'limit': request.GET.get('limit', ''),
+        }
         
-#         roads = Road.nodes.all()
+        roads = Road.nodes.all()
 
-#         roads_data = [road.serialize for road in roads]
-#         data = {
-#             'response': {
-#                 'status': '200',
-#                 'data': roads_data,   
-#             },
-#         }
-#         return Response(data)
+        roads_data = [road.serialize for road in roads]
+        data = {
+            'response': {
+                'status': '200',
+                'data': roads_data,   
+            },
+        }
+        return Response(data)
 
 
 # class GetIncidentNodes(APIView):

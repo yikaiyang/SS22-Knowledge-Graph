@@ -16,12 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import GetPOINodes
+from .views import GetPOINodes, GetRoadNodes
 #from .views import GetPOINodes, GetIncidentNodes, GetRoadNodes
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('poi/', GetPOINodes.as_view(), name='get_poi'),
-    # path('incident/', GetIncidentNodes.as_view(), name='get_roads'),
-    # path('road/', GetRoadNodes.as_view(), name='get_roads')
+    #path('incident/', GetIncidentNodes.as_view(), name='get_roads'),
+    path('road/', GetRoadNodes.as_view(), name='get_roads')
 ]
