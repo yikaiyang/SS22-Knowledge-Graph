@@ -48,6 +48,8 @@ class Neo4JIntegration:
         #print(f"Creating incident {incident['IncidentType']} criticality: {incident['Criticality']}")
         incidentType = incident["IncidentType"]
         criticality = incident["Criticality"]
+        latitude = incident["CenterLatitude"]
+        longitude = incident["CenterLongitude"]
         timestamp = incident["Timestamp"]
         time = parser.parse(timestamp)
         hour = time.hour
@@ -71,7 +73,9 @@ class Neo4JIntegration:
                 {{
                     name: '{incidentType}',
                     incidentType: '{incidentType}',
-                    criticality: '{criticality}'
+                    criticality: '{criticality}',
+                    latitude: '{latitude}',
+                    longitude: '{longitude}'
                 }}
             )
             MERGE (i)<-[:HAS_INCIDENT]-(d)

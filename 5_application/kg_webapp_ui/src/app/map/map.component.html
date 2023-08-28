@@ -1,13 +1,32 @@
-<mgl-map
-  [style]="'mapbox://styles/mapbox/streets-v9'"
-  [zoom]="[12]"
-  [center]="[16.36, 48.21]"
->
-    <mgl-marker
-        *ngFor="let location of locations"
-        [lngLat]="[location.longitude, location.latitude]"
-    >
-        <div class="marker">
+<p-dialog header="{{(selectedLocation$ | async)?.name}}" [(visible)]="display" position="left">
+    <p-listbox optionLabel="name" [style]="{'height': '32rem', 'width':'18rem'}">
+        <ng-template pTemplate="header">
+            <div>
+                <div class="font-bold mb-2">RELATIONSHIP:</div>
+                <p-dropdown [options]="relationships"></p-dropdown>
+                <div class="mt-2">
+                    <p-selectButton 
+                        [options]="tab_menu_options"
+                        [(ngModel)]="selected_tab_menu_option" 
+                        styleClass="p-select-button-sm"></p-selectButton>
+                </div>
+                <div *ngIf="selected_tab_menu_option == tab_menu_options[1]">
+                    <p-divider></p-divider>
+                    <div class="font-bold font-xs mb-2">MODEL:</div>
+                    <p-dropdown [options]="models"></p-dropdown>
+                </div>
+                
+            </div>
+        </ng-template>
+    </p-listbox>
+</p-dialog>
+
+<mgl-map [style]="'mapbox://styles/mapbox/streets-v9'" [zoom]="[12]" [center]="[16.36, 48.21]">
+    <mgl-marker *ngFor="let location of locations$ | async" [lngLat]="[location.longitude, location.latitude]">
+        <div class="marker active" [class.active]="location == (selectedLocation$ | async)" pTooltip="{{location.name}}"
+            (click)="onItemClick(location)">
+            <!-- (click)="onItemClick(location)" -->
         </div>
     </mgl-marker>
+
 </mgl-map>

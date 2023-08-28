@@ -1,18 +1,18 @@
 from neomodel import (config, StructuredNode, StringProperty,
                       IntegerProperty, FloatProperty, RelationshipTo, RelationshipFrom, UniqueIdProperty)
 
-
 from .nodeutils import NodeUtils
 
 class Incident(StructuredNode, NodeUtils):
     node_id = UniqueIdProperty()
     criticality = StringProperty()
-    incident_type = StringProperty()
+    incident_type = StringProperty(db_property='incidentType')
     name = StringProperty()
+    latitude = FloatProperty()
+    longitude = FloatProperty()
 
-    date_time = RelationshipFrom('.datetime.DateTime', 'HAS_INCIDENTS')
-    traffic_situations = RelationshipTo('.traffic_situation.TrafficSituation', 'HAS_TRAFFIC_SITUATION')
-
+    date_time = RelationshipFrom('.datetime.DateTime', 'HAS_INCIDENT')
+ 
     @property
     def serialize(self):
         return {
@@ -20,6 +20,8 @@ class Incident(StructuredNode, NodeUtils):
                 'node_id': self.node_id,
                 'criticality': self.criticality,
                 'incident_type': self.incident_type,
+                'latitude': self.latitude,
+                'longitude': self.longitude,
                 'name': self.name
             },
         }
@@ -30,9 +32,5 @@ class Incident(StructuredNode, NodeUtils):
             {
                 'nodes_type': 'DateTime',
                 'nodes_related': self.serialize_relationships(self.date_time.all()),
-            },
-            {
-                'nodes_type': 'TrafficSituation',
-                'nodes_related': self.serialize_relationships(self.traffic_situations.all()),
             }
     ]

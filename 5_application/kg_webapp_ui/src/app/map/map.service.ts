@@ -1,26 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, Subject, from, of } from 'rxjs';
+import { POI } from '../app/responses/poi-response';
+import { Location } from '../app/responses/location';
 
-
-export interface Location {
-  latitude: number,
-  longitude: number,
-  name: string,
-  type: string
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class MapService {
 
-  locations: Location[] = [{ 
-    latitude: 48.21, 
-    longitude: 16.36,
-    name: 'Location',
-    type: 'Unknown'
-  }]
+  locations$: Subject<Location[]> = new Subject()
 
-  constructor() { 
+  constructor() {
   }
 }

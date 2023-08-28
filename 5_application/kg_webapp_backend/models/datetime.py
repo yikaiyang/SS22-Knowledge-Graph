@@ -1,7 +1,6 @@
 from neomodel import (config, StructuredNode, StringProperty,
                       IntegerProperty, FloatProperty, RelationshipTo, UniqueIdProperty)
 
-config.DATABASE_URL = 'bolt://neo4j:password@localhost:7687'
 from .nodeutils import NodeUtils
 
 class DateTime(StructuredNode, NodeUtils):
@@ -13,7 +12,7 @@ class DateTime(StructuredNode, NodeUtils):
     minute = IntegerProperty()
     name = StringProperty()
 
-    incidents = RelationshipTo('.incident.Incident', 'HAS_INCIDENTS')
+    incidents = RelationshipTo('.incident.Incident', 'HAS_INCIDENT')
     traffic_situations = RelationshipTo(
         '.traffic_situation.TrafficSituation', 'HAS_TRAFFIC_SITUATION')
     weather = RelationshipTo('.weather.Weather', 'HAS_WEATHER')

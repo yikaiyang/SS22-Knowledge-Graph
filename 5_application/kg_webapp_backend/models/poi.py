@@ -1,7 +1,6 @@
 from neomodel import (config, StructuredNode, StringProperty,
                       IntegerProperty, FloatProperty, RelationshipTo, UniqueIdProperty)
 
-config.DATABASE_URL = 'bolt://neo4j:kgtransport@localhost:7687/neo4j'
 
 from .nodeutils import NodeUtils
 
