@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { POIResponse, POI } from './responses/poi-response';
 import { IncidentResponse, Incident} from './responses/incident-response';
 import { Road, RoadResponse } from './responses/road-response';
+import { Location, RelatedNodeResponse } from './responses/related_node-response';
 
 @Injectable({
   providedIn: 'root'
@@ -48,6 +49,25 @@ export class AppService {
       map(response => 
         response.response.data.map(data => data.node_properties))
     )
+  }
+  
+
+  getRelatedNodesResponse(nodeId: string, relationship: string, prediction_model?: string): Observable<RelatedNodeResponse> {
+    if (prediction_model != null) {
+      return this.httpClient
+        .get<RelatedNodeResponse>(`http://localhost:8000/nodes?id=${nodeId}&r=${relationship}&p=${prediction_model}`)
+    } else {
+      return this.httpClient
+        .get<RelatedNodeResponse>(`http://localhost:8000/nodes?id=${nodeId}&r=${relationship}`)
+    }
+  }
+
+  getRelatedNodes(nodeId: string, relationship: string, prediction_model?: string): Observable<Location[]> {
+    return this.getRelatedNodesResponse(nodeId, relationship, prediction_model)
+      .pipe(map(response => 
+        response.response.data.map(data => data.node_properties)
+        )
+      )
   }
 
 }

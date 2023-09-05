@@ -1,32 +1,51 @@
-<p-dialog header="{{(selectedLocation$ | async)?.name}}" [(visible)]="display" position="left">
-    <p-listbox optionLabel="name" [style]="{'height': '32rem', 'width':'18rem'}">
+<p-dialog header="{{selectedLocation.name}}" [(visible)]="display" position="left">
+    <p-listbox [options]="relationship_list" optionLabel="name" [style]="{'height': '32rem', 'width':'18rem'}"
+        [listStyle]="{'max-height': '22rem'}" (onChange)="onRelationshipChange()">
         <ng-template pTemplate="header">
             <div>
                 <div class="font-bold mb-2">RELATIONSHIP:</div>
-                <p-dropdown [options]="relationships"></p-dropdown>
+                <p-dropdown [options]="relationships" [(ngModel)]="selectedRelationship"
+                    (onChange)="onRelationshipChange()"></p-dropdown>
                 <div class="mt-2">
-                    <p-selectButton 
-                        [options]="tab_menu_options"
-                        [(ngModel)]="selected_tab_menu_option" 
-                        styleClass="p-select-button-sm"></p-selectButton>
+                    <p-selectButton (onOptionClick)="onSelectTabMenuItem()" [options]="tab_menu_options"
+                        [(ngModel)]="selected_tab_menu_option" styleClass="p-select-button-sm"></p-selectButton>
                 </div>
                 <div *ngIf="selected_tab_menu_option == tab_menu_options[1]">
                     <p-divider></p-divider>
                     <div class="font-bold font-xs mb-2">MODEL:</div>
-                    <p-dropdown [options]="models"></p-dropdown>
+                    <p-dropdown [options]="models" [(ngModel)]="selectedModel" (onChange)="onTabSelect()"></p-dropdown>
                 </div>
-                
+            </div>
+        </ng-template>
+        <ng-template let-item pTemplate="item">
+            <div>{{item.name}} 
+                <p-tag>{{item.entity_type}}</p-tag>
             </div>
         </ng-template>
     </p-listbox>
 </p-dialog>
 
 <mgl-map [style]="'mapbox://styles/mapbox/streets-v9'" [zoom]="[12]" [center]="[16.36, 48.21]">
-    <mgl-marker *ngFor="let location of locations$ | async" [lngLat]="[location.longitude, location.latitude]">
-        <div class="marker active" [class.active]="location == (selectedLocation$ | async)" pTooltip="{{location.name}}"
-            (click)="onItemClick(location)">
-            <!-- (click)="onItemClick(location)" -->
-        </div>
-    </mgl-marker>
-
+    <span *ngFor="let location of locations$ | async">
+        <span>
+            <mgl-marker *ngIf="!!location && !!location.latitude 
+            && !!location.longitude 
+            && isFinite(location.latitude) 
+            && isFinite(location.longitude)" [lngLat]="[location.longitude, location.latitude]">
+                <div class="marker active" [class.active]="location == selectedLocation" pTooltip="{{location.name}}"
+                    (click)="onItemClick(location)">
+                    <!-- (click)="onItemClick(location)" -->
+                </div>
+            </mgl-marker>
+        </span>
+    </span>
+    <span *ngFor="let location of relationship_list">
+        <mgl-marker *ngIf="!!location && !!location.latitude 
+        && !!location.longitude 
+        && isFinite(location.latitude) 
+        && isFinite(location.longitude)" [lngLat]="[location.longitude, location.latitude]">
+            <div class="related-marker">
+            </div>
+        </mgl-marker>
+    </span>
 </mgl-map>

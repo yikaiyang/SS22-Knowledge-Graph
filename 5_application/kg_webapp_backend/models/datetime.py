@@ -1,10 +1,9 @@
-from neomodel import (config, StructuredNode, StringProperty,
-                      IntegerProperty, FloatProperty, RelationshipTo, UniqueIdProperty)
+from neomodel import ( StructuredNode, StringProperty,
+                      IntegerProperty)
+from kg_webapp_backend.util import element_id_to_node_id
 
-from .nodeutils import NodeUtils
-
-class DateTime(StructuredNode, NodeUtils):
-    node_id = UniqueIdProperty()
+class DateTime(StructuredNode):
+    # node_id =  StringProperty()
     day = IntegerProperty()
     month = IntegerProperty()
     year = IntegerProperty()
@@ -12,17 +11,18 @@ class DateTime(StructuredNode, NodeUtils):
     minute = IntegerProperty()
     name = StringProperty()
 
-    incidents = RelationshipTo('.incident.Incident', 'HAS_INCIDENT')
-    traffic_situations = RelationshipTo(
-        '.traffic_situation.TrafficSituation', 'HAS_TRAFFIC_SITUATION')
-    weather = RelationshipTo('.weather.Weather', 'HAS_WEATHER')
-    temperature = RelationshipTo('.temperature.Temperature', 'HAS_TEMPERATURE')
+    # incidents = RelationshipTo('.incident.Incident', 'HAS_INCIDENT')
+    # traffic_situations = RelationshipTo(
+    #     '.traffic_situation.TrafficSituation', 'HAS_TRAFFIC_SITUATION')
+    # weather = RelationshipTo('.weather.Weather', 'HAS_WEATHER')
+    # temperature = RelationshipTo('.temperature.Temperature', 'HAS_TEMPERATURE')
 
     @property
     def serialize(self):
         return {
             'node_properties': {
-                'node_id': self.node_id,
+                'entity_type': __class__.__name__,
+                'node_id': element_id_to_node_id(self.element_id),
                 'day': self.day,
                 'month': self.month,
                 'year': self.year,
@@ -32,24 +32,24 @@ class DateTime(StructuredNode, NodeUtils):
             },
         }
 
-    @property
-    def serialize_connections(self):
-        return [
-            {
-                'nodes_type': 'Incident',
-                'nodes_related': self.serialize_relationships(self.incidents.all()),
-            },
-            {
-                'nodes_type': 'Traffic Situations',
-                'nodes_related': self.serialize_relationships(self.traffic_situations.all()),
-            },
-            {
-                'nodes_type': 'Weather',
-                'nodes_related': self.serialize_relationships(self.weather.all()),
-            },
-            {
-                'nodes_type': 'Temperature',
-                'nodes_related': self.serialize_relationships(self.temperature.all()),
-            },
-    ]
+    # @property
+    # def serialize_connections(self):
+    #     return [
+    #         {
+    #             'nodes_type': 'Incident',
+    #             'nodes_related': self.serialize_relationships(self.incidents.all()),
+    #         },
+    #         {
+    #             'nodes_type': 'Traffic Situations',
+    #             'nodes_related': self.serialize_relationships(self.traffic_situations.all()),
+    #         },
+    #         {
+    #             'nodes_type': 'Weather',
+    #             'nodes_related': self.serialize_relationships(self.weather.all()),
+    #         },
+    #         {
+    #             'nodes_type': 'Temperature',
+    #             'nodes_related': self.serialize_relationships(self.temperature.all()),
+    #         },
+    # ]
 

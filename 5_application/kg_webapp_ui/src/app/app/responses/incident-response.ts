@@ -12,6 +12,7 @@ export interface Data {
 }
 
 export interface Incident {
+    entity_type?: string
     node_id: string
     criticality: string
     incident_type: string

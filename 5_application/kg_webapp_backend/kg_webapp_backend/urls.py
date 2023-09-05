@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import GetPOINodes, GetIncidentNodes, GetRoadNodes
+from .views import GetPOINodes, GetIncidentNodes, GetRoadNodes, GetPredictedRelatedNodes
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('nodes', GetPredictedRelatedNodes.as_view(), name='get_related_nodes'),
     path('poi/', GetPOINodes.as_view(), name='get_poi'),
     path('incident/', GetIncidentNodes.as_view(), name='get_incidents'),
     path('road/', GetRoadNodes.as_view(), name='get_roads')

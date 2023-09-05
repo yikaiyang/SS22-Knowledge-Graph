@@ -12,6 +12,7 @@ export interface Data {
 }
 
 export interface POI {
+  entity_type?: string
   node_id: string
   latitude: number
   longitude: number

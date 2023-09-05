@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
-from neomodel import config
+from neomodel import config, install_all_labels
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +56,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'kg_webapp_backend.urls'
 
 CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS=['*']
 
 TEMPLATES = [
     {
@@ -88,6 +89,9 @@ WSGI_APPLICATION = 'kg_webapp_backend.wsgi.application'
 
 #config.DATABASE_URL = 'bolt://neo4j@localhost:7687/neo4j'
 config.DATABASE_URL = 'bolt://neo4j:kgtransport@localhost:7687/'
+config.AUTO_INSTALL_LABELS = True
+
+install_all_labels()
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

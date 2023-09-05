@@ -1,5 +1,7 @@
 export interface Location { 
-    latitude: number, 
-    longitude: number,
+    entity_type?: string,
+    latitude?: number, 
+    longitude?: number,
     name?: string,
+    node_id: string,
 }

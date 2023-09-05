@@ -12,6 +12,7 @@ export interface RoadResponse {
   }
   
   export interface Road {
+    entity_type?: string
     node_id: string
     latitude: number
     longitude: number

@@ -407,7 +407,7 @@ For reference the API is documented at the following website: https://location.f
 
 
 ![Ontology of this project](/documents/map_area/street_collection_points.png)
-*Traffic data of all locations colored in blue are collected*
+*Traffic data of all locations colored in blue were collected*
 
 
 
@@ -482,63 +482,62 @@ For the training of the dataset, it was initially planned to use the same KG mod
 
 ## Results
 
-<h3>Head Entity Prediction (Epochs: n=500)</h3>
+<h3>Head Entity Prediction (n=500)</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |13.252884388980457   |76.64%   |53.92%   |22.37%   |
-|TransE   |28.977866729456085   |69.60%   |51.14%   |35.06%   |
-|**TransH**   |10.66352719566753   |**77.96%**   |**64.35%**   |**48.36%**   |
-|RotatE   |20.88697904403108   |69.11%   |45.26%   |31.01%   |
+|TransD   |18.600344827586206   |58.14%   |36.03%   |9.45%   |
+|TransE   |40.15758620689655   |55.31%   |40.31%   |30.52%   |
+|TransH   |15.17344827586207   |66.10%   |51.00%   |46.34%   |
+|RotatE   |29.984137931034482   |67.83%   |53.45%   |46.38%   |
 <h3>Tail Entity Prediction</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |**17.16246762420532**   |66.02%   |50.25%   |17.42%   |
-|TransE   |31.28890981869555   |56.65%   |34.64%   |19.31%   |
-|TransH   |17.67247468801507   |**64.61%**   |**50.39%**   |**37.96%**   |
-|RotatE   |25.74476100777019   |59.52%   |42.45%   |29.79%   |
+|TransD   |8.913793103448276   |79.31%   |56.72%   |10.72%   |
+|TransE   |27.871379310344828   |67.07%   |47.34%   |26.24%   |
+|TransH   |6.6803448275862065   |79.93%   |68.00%   |45.41%   |
+|RotatE   |21.900344827586206   |78.45%   |64.45%   |46.52%   |
 
 <hr/>
 
-<h3>Head Entity Prediction (Epochs: n=1000)</h3>
+<h3>Head Entity Prediction (n=1000)</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |13.72992700729927   |75.32%   |52.25%   |16.03%   |
-|TransE   |30.178714386625852   |63.74%   |41.89%   |24.44%   |
-|**TransH**   |**10.157758417706617**   |**78.24%**   |**65.29%**   |**50.60%**   |
-|RotatE   |49.13397692488816   |53.78%   |34.99%   |25.52%   |
+|TransD   |20.65137931034483   |58.07%   |34.14%   |2.00%   |
+|TransE   |42.743793103448276   |54.31%   |35.38%   |22.55%   |
+|**TransH**   |**15.014827586206897**   |**65.62%**   |**51.48%**   |**46.62%**   |
+|RotatE   |80.37793103448276   |56.10%   |40.21%   |30.28%   |
 <h3>Tail Entity Prediction</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |17.727336943724982   |**65.39%**   |47.26%   |10.81%   |
-|TransE   |35.58629620908877   |52.79%   |32.63%   |18.01%   |
-|**TransH**   |**16.661643513068046**   |65.20%   |**49.02%**   |**38.83%**   |
-|RotatE   |56.456793030374385   |49.35%   |30.33%   |17.78%   |
+|TransD   |13.61   |68.79%   |28.14%   |2.52%   |
+|TransE   |29.298275862068966   |56.83%   |30.41%   |13.48%   |
+|**TransH**   |**6.268965517241379**   |**80.34%**   |**68.48%**   |**56.52%**   |
+|RotatE   |122.58620689655173   |44.55%   |26.38%   |15.66%   |
 
 <hr/>
 
-<h3>Head Entity Prediction (Epochs: n= 2000)</h3>
+<h3>Head Entity Prediction (n=2000)</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |13.464092300447374   |76.15%   |51.57%   |12.41%   |
-|TransE   |36.23757946785967   |60.63%   |36.45%   |18.93%   |
-|**TransH**   |**10.497763126913116**   |**76.92%**   |**64.63%**   |**49.80%**   |
-|RotatE   |106.3312926771839   |38.26%   |24.53%   |17.75%   |
+|TransD   |20.65137931034483   |58.07%   |34.14%   |2.00%   |
+|TransE   |42.743793103448276   |54.31%   |35.38%   |22.55%   |
+|**TransH**   |**15.014827586206897**   |**65.62%**   |**51.48%**   |**46.62%**   |
+|RotatE   |80.37793103448276   |56.10%   |40.21%   |30.28%   |
 <h3>Tail Entity Prediction</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
 |---|---|---|---|---|
-|TransD   |17.358370614551447   |65.43%   |46.22%   |9.28%   |
-|TransE   |39.20367318106899   |47.59%   |27.20%   |15.80%   |
-|**TransH**   |**16.955733458912174**   |**63.74%**   |**51.28%**   |**38.12%**   |
-|RotatE   |115.26465740522723   |33.25%   |16.74%   |8.15%   |
-
+|TransD   |13.61   |68.79%   |28.14%   |2.52%   |
+|TransE   |29.298275862068966   |56.83%   |30.41%   |13.48%   |
+|**TransH**   |**6.268965517241379**   |**80.34%**   |**68.48%**   |**56.52%**   |
+|RotatE   |122.58620689655173   |44.55%   |26.38%   |15.66%   |
 ## Interpretation
-In contra
+In contrast to the result in the paper the model TransH performs the best, in both Head and Tail Entity prediction with substantially better results than the other models in all metrics. The reason for this observation could be found in the large number of 1-to-N relationships between the entities . TransH, in contrast to other models uses a hyperplane which is able to encode 1-to-N relationships between entities. 
 
 
 
