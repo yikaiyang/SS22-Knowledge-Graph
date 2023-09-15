@@ -4,7 +4,7 @@ import os
 import json
 import sys
 
-embeddings = ['TransD', 'TransE', 'TransH', 'RotatE']
+embeddings = ['TransD', 'TransE', 'TransH', 'RotatE', 'ConvE']
 WRITE_TO_FILE = False
 
 def get_value_as_percentage(value):
@@ -12,7 +12,7 @@ def get_value_as_percentage(value):
     formatted_percentage = "{:.2f}%".format(percentage)
     return formatted_percentage
 
-def print_results(write_to_file=WRITE_TO_FILE):
+def print_results(write_to_file=WRITE_TO_FILE, embeddings = embeddings):
     working_dir = Path(__file__).parent
 
     if write_to_file is True:

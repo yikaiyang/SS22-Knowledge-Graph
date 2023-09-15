@@ -14,9 +14,6 @@ export class AppComponent {
 
   sub: Subscription | null = null;
 
-
-
-
   categories = [
     { label: 'POI' },
     { label: 'Streets' },
@@ -51,6 +48,9 @@ export class AppComponent {
           })
         ).subscribe();
 
+        this.appService.active_category$.next(
+          this.categories[0].label
+        )
         break;
       case 1:
         // Streets
@@ -60,6 +60,10 @@ export class AppComponent {
             this.mapService.locations$.next(res)
           })
         ).subscribe();
+
+        this.appService.active_category$.next(
+          this.categories[1].label
+        )
         break;
       case 2:
         // Incidents
@@ -69,9 +73,16 @@ export class AppComponent {
             this.mapService.locations$.next(res)
           })
         ).subscribe();
+
+        this.appService.active_category$.next(
+          this.categories[2].label
+        )
         break;
     }
   }
 
+  onClickFilter() {
+    this.appService.isTrafficSpeedFilterActive$.next(true);
+  }
 
 }

@@ -1,4 +1,7 @@
-<h1 class="text-2xl ml-3 font-normal">Road Network KG</h1>
+<div class="flex justify-content-between">
+  <h1 class="text-2xl ml-3 font-normal">Road Network KG</h1>
+  <p-button label="Traffic Speed" (onClick)="onClickFilter()"></p-button>
+</div>
 
 <p-tabMenu [activeItem]="active_category"
     [model]="categories">

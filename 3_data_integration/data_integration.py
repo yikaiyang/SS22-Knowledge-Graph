@@ -59,14 +59,19 @@ class Neo4JIntegration:
         year = time.year
 
         stmt = f"""
-            MERGE (d: DateTime
+            MERGE (d: Date
                 {{
-                    name: '{day}-{month}-{year} {hour}:{minute}',
-                    hour: {hour},
-                    minute: {minute},
+                    name: '{day}-{month}-{year}',
                     day: {day},
                     month: {month},
                     year: {year}
+                }}
+            )
+            MERGE (t: Time
+                {{
+                    name: '{hour}:{minute}',
+                    hour: {hour},
+                    minute: {minute}
                 }}
             )
             MERGE (i:Incident
@@ -78,7 +83,8 @@ class Neo4JIntegration:
                     longitude: '{longitude}'
                 }}
             )
-            MERGE (i)<-[:HAS_INCIDENT]-(d)
+            MERGE (i)<-[:HAS_INCIDENT]-(t)
+            MERGE (t)<-[:DATE_TIME]-(d)
             RETURN i;
         """
         result = tx.run(stmt)
@@ -154,14 +160,20 @@ class Neo4JIntegration:
         year = time.year
 
         stmt = f"""
-            MERGE (d: DateTime
+            MERGE (d: Date
                 {{
-                    name: '{day}-{month}-{year} {hour}:{minute}',
-                    hour: {hour},
-                    minute: {minute},
+                    name: '{day}-{month}-{year}',
                     day: {day},
                     month: {month},
                     year: {year}
+                }}
+            )
+
+            MERGE (t: Time
+                {{
+                    name: '{hour}:{minute}',
+                    hour: {hour},
+                    minute: {minute}
                 }}
             )
 
@@ -169,13 +181,15 @@ class Neo4JIntegration:
                 {{
                     name: '{weather}'
                 }}
-            )<-[:HAS_WEATHER]-(d)
+            )<-[:HAS_WEATHER]-(t)
 
-            MERGE (t:Temperature
+            MERGE (tm:Temperature
                 {{
                     name: '{temp}'
                 }}
-            )<-[:HAS_TEMPERATURE]-(d)
+            )<-[:HAS_TEMPERATURE]-(t)
+            
+            MERGE (t)<-[:DATE_TIME]-(d)
             RETURN w,t;
         """
         result = tx.run(stmt)
@@ -205,14 +219,19 @@ class Neo4JIntegration:
         year = date.year
 
         stmt = f"""
-            MERGE (d: DateTime
+            MERGE (d: Date
                 {{
-                    name: '{day}-{month}-{year} {hour}:{minute}',
-                    hour: {hour},
-                    minute: {minute},
+                    name: '{day}-{month}-{year}',
                     day: {day},
                     month: {month},
                     year: {year}
+                }}
+            )
+            MERGE (t: Time
+                {{
+                    name: '{hour}:{minute}',
+                    hour: {hour},
+                    minute: {minute}
                 }}
             )
             RETURN d
@@ -273,17 +292,23 @@ class Neo4JIntegration:
                     incidentType: '{incidentType}',
                     criticality: '{criticality}' 
                 }})
-            MERGE (d: DateTime
+            MERGE (d: Date
                 {{
-                    name: '{day}-{month}-{year} {hour}:{minute}',
-                    hour: {hour},
-                    minute: {minute},
+                    name: '{day}-{month}-{year}',
                     day: {day},
                     month: {month},
                     year: {year}
                 }}
             )
-            MERGE (i)<-[:HAS_INCIDENT]-(d)
+            MERGE (t: Time
+                {{
+                    name: '{hour}:{minute}',
+                    hour: {hour},
+                    minute: {minute}
+                }}
+            ) 
+            MERGE (i)<-[:HAS_INCIDENT]-(t)
+            MERGE (t)<-[:DATE_TIME]-(d)
             {merge_clauses_incident_street_stmt}
             RETURN i;
         """
@@ -369,18 +394,25 @@ class Neo4JIntegration:
 
         stmt = f"""
             MATCH (r:Road {{ name: '{road_key}'}})
-            MERGE (t: TrafficSituation {{ speed: {speedUncapped}}})
-            MERGE (d: DateTime
+            MERGE (tr: TrafficSituation {{ speed: {speedUncapped}}})
+            MERGE (d: Date
                 {{
-                    name: '{day}-{month}-{year} {hour}:{minute}',
-                    hour: {hour},
-                    minute: {minute},
+                    name: '{day}-{month}-{year}',
                     day: {day},
                     month: {month},
                     year: {year}
                 }}
             )
-            MERGE (t)<-[:HAS_TRAFFIC_SITUATION]-(d)
+            MERGE (t: Time
+                {{
+                    name: '{hour}:{minute}',
+                    hour: {hour},
+                    minute: {minute}
+                }}
+            ) 
+            MERGE (tr)<-[:HAS_TRAFFIC_SITUATION]-(t)
+            MERGE (t)<-[:DATE_TIME]-(d)
+            MERGE (d)<-[:ROAD_DATE]-(r)
             RETURN r;
         """
         #print(stmt)
@@ -389,7 +421,6 @@ class Neo4JIntegration:
     #endregion
 
     def load_poi(self):
-        ## TODO LOAD Poi
         POI_FILE_PATH = 'data/poi/poi.csv'
         filePath = os.path.join(working_dir,POI_FILE_PATH)
         #print(filePath)

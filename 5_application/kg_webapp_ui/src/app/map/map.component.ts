@@ -3,6 +3,8 @@ import { MapService } from './map.service';
 import { Observable as BehaviourSubject, Subject, of } from 'rxjs';
 import { Location } from '../app/responses/location';
 import { AppService } from '../app/app.service';
+import { Time } from '../app/responses/time-response';
+import { Date } from '../app/responses/date-response';
 
 @Component({
   selector: 'app-map',
@@ -16,6 +18,7 @@ export class MapComponent implements OnInit {
     'TransD',
     'TransH',
     'RotatE',
+    'ConvE',
   ]
 
   selectedModel: any;
@@ -26,14 +29,13 @@ export class MapComponent implements OnInit {
 
   onSelectTabMenuItem() {
     if (this.selected_tab_menu_option == this.tab_menu_options[0]) {
-        // Existing
-        this.onRelationshipChange()
+      // Existing
+      this.onRelationshipChange()
     } else if (this.selected_tab_menu_option == this.tab_menu_options[1]) {
-        // Predictions
-        this.onRelationshipChange()
+      // Predictions
+      this.onRelationshipChange()
     }
   }
-
 
   relationships = [
     'IS_CONNECTED',
@@ -46,8 +48,6 @@ export class MapComponent implements OnInit {
   ]
 
   selectedRelationship = this.relationships[0];
-
-
 
   selectedLocation: any = {};
 
@@ -71,20 +71,20 @@ export class MapComponent implements OnInit {
     if (this.selected_tab_menu_option == this.tab_menu_options[0]) {
       //Existing
       this.appService
-      .getRelatedNodes(location.node_id, this.selectedRelationship)
-      .subscribe((result) => {
-        this.relationship_list = result
-      })
+        .getRelatedNodes(location.node_id, this.selectedRelationship)
+        .subscribe((result) => {
+          this.relationship_list = result
+        })
     } else {
       // Using KGE models
       // Get model
       this.appService
-      .getRelatedNodes(location.node_id, this.selectedRelationship, this.selectedModel)
-      .subscribe((result) => {
-        this.relationship_list = result
-      })
+        .getRelatedNodes(location.node_id, this.selectedRelationship, this.selectedModel)
+        .subscribe((result) => {
+          this.relationship_list = result
+        })
     }
-   
+
   }
 
   onTabSelect() {
@@ -109,11 +109,20 @@ export class MapComponent implements OnInit {
     private mapService: MapService,
     private appService: AppService
   ) {
+    this.appService.active_category$.subscribe((cat) => {
+      this.activeCategory = cat
+    });
   }
 
   ngOnInit(): void {
     this.locations$ = this.mapService.locations$;
+    this.appService.isTrafficSpeedFilterActive$.subscribe((value) => {
+      this.isTrafficSpeedFilterActive = value
+      this.showTrafficFilter()
+    });
   }
+
+  isTrafficSpeedFilterActive = false;
 
 
   onItemClick(location: Location) {
@@ -134,7 +143,6 @@ export class MapComponent implements OnInit {
     this.display = true;
   }
 
-
   hasProp(o: any, name: any) {
     return o.hasOwnProperty(name);
   }
@@ -142,4 +150,58 @@ export class MapComponent implements OnInit {
   isFinite(number: number): boolean {
     return Number.isFinite(number)
   }
+
+
+  /// Filter
+  displayTrafficFilter: boolean = true;
+  showTrafficFilter() {
+    this.appService.getTime().subscribe(times =>
+      this.times = times
+    );
+
+    this.appService.getDate().subscribe(dates =>
+      this.dates = dates 
+    );
+  }
+
+  trafficSliderValue: any;
+  activeCategory: string = '';
+
+  speed_range_map_markers: any = []
+
+  applySpeedFilter() {
+    if (!this.trafficSliderValue[0] || !this.trafficSliderValue[1]) {
+      alert('Please enter a valid speed range');
+    }
+
+    const selectedDate = this.dateTimeChecked ? (this.selectedDate?.name ?? '') : '';
+    const selectedTime = this.dateTimeChecked ? (this.selectedTime?.name ?? '') : '';
+
+    if (this.activeCategory == 'Streets') {
+      this.appService.getSpeedFilter('Road', this.trafficSliderValue[0], this.trafficSliderValue[1], selectedDate, selectedTime).subscribe(
+        (roads) => this.speed_range_map_markers = roads
+      )
+    } else if (this.activeCategory == 'POI') {
+      alert('Loading POIs');
+      this.appService.getSpeedFilter('POI', this.trafficSliderValue[0], this.trafficSliderValue[1], selectedDate, selectedTime).subscribe(
+        (roads) => this.speed_range_map_markers = roads
+      )
+    } else if (this.activeCategory == 'Incidents') {
+      alert('Loading Incidents');
+      this.appService.getSpeedFilter('Incident', this.trafficSliderValue[0], this.trafficSliderValue[1], selectedDate, selectedTime).subscribe(
+        (roads) => this.speed_range_map_markers = roads
+      )
+    } else {
+      alert('Error: Please select a category (POIs, Streets, Incidents) from the Tab Menu.')
+    }
+  }
+
+  // Date
+  dates: Date[] = []
+  times: Time[] = []
+
+  selectedDate?: Date;
+  selectedTime?: Time;
+  dateTimeChecked: boolean = false;
+
 }

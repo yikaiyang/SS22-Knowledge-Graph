@@ -18,12 +18,46 @@
             </div>
         </ng-template>
         <ng-template let-item pTemplate="item">
-            <div>{{item.name}} 
+            <div>{{item.name}}
                 <p-tag>{{item.entity_type}}</p-tag>
             </div>
         </ng-template>
     </p-listbox>
 </p-dialog>
+
+<p-dialog header="Filter: Traffic speed" [(visible)]="isTrafficSpeedFilterActive" position="right"
+    [style]="{'width': '24rem', 'height': '32rem'}">
+    <div>
+        Average Speed Range:
+        <div class="flex justify-content-between">
+            <b>
+                {{trafficSliderValue && trafficSliderValue[0]}} km/h
+                -
+                {{trafficSliderValue && trafficSliderValue[1]}} km/h
+            </b>
+            <button pButton type="button" label="Apply" icon="pi pi-check" class="p-button-sm"
+                (click)="applySpeedFilter()"></button>
+        </div>
+        <div class="p-2"></div>
+
+        <p-slider [(ngModel)]="trafficSliderValue" [step]="1" [range]="true"></p-slider>
+        <p-divider></p-divider>
+        <div class="mt-2">
+            Filter using Time: <p-checkbox [(ngModel)]="dateTimeChecked" [binary]="true"></p-checkbox> 
+            <div class="mt-2">
+                Date:
+                <p-dropdown [options]="dates" [(ngModel)]="selectedDate" optionLabel="name"></p-dropdown>
+            </div>
+            <div>
+                Time:
+                <p-dropdown [options]="times" [(ngModel)]="selectedTime" optionLabel="name"></p-dropdown>
+            </div>
+        </div>
+    </div>
+</p-dialog>
+
+
+
 
 <mgl-map [style]="'mapbox://styles/mapbox/streets-v9'" [zoom]="[12]" [center]="[16.36, 48.21]">
     <span *ngFor="let location of locations$ | async">
@@ -39,13 +73,26 @@
             </mgl-marker>
         </span>
     </span>
+
+
+    <span *ngFor="let location of speed_range_map_markers">
+        <mgl-marker *ngIf="!!location && !!location.latitude 
+            && !!location.longitude 
+            && isFinite(location.latitude) 
+            && isFinite(location.longitude)" [lngLat]="[location.longitude, location.latitude]">
+            <div class="speed-marker">
+            </div>
+        </mgl-marker>
+    </span>
+
     <span *ngFor="let location of relationship_list">
         <mgl-marker *ngIf="!!location && !!location.latitude 
-        && !!location.longitude 
-        && isFinite(location.latitude) 
-        && isFinite(location.longitude)" [lngLat]="[location.longitude, location.latitude]">
+            && !!location.longitude 
+            && isFinite(location.latitude) 
+            && isFinite(location.longitude)" [lngLat]="[location.longitude, location.latitude]">
             <div class="related-marker">
             </div>
         </mgl-marker>
     </span>
+
 </mgl-map>

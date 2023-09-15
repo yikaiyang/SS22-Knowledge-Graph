@@ -10,9 +10,9 @@ if __name__ == "__main__":
     print('Starting script')
     
     # 1) First, data is transformed from raw data
-    # transform_incidents()
-    # transform_traffic()
-    # transform_weather()
+    transform_incidents()
+    transform_traffic()
+    transform_weather()
     transform_poi()
     
     # 2) Second, data between datapoints are linked

@@ -40,6 +40,19 @@ mgl-map {
 }
 
 
+::ng-deep .speed-marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: rgb(253, 16, 16);
+    color: white;
+    // box-shadow: 4px 4px 4px 0 rgba(226,226,226,0.50);
+    z-index: 701;
+}
+
+
+
 ::ng-deep .active {
     width: 14px;
     height: 14px;

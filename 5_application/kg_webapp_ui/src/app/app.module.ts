@@ -22,6 +22,10 @@ import {PanelModule} from 'primeng/panel';
 import { FormsModule } from '@angular/forms';
 import {Divider, DividerModule} from 'primeng/divider';
 import { TagModule } from 'primeng/tag';
+import { Slider, SliderModule } from 'primeng/slider';
+import {InputTextModule } from 'primeng/inputtext';
+import {CheckboxModule} from 'primeng/checkbox';
+
 
 const TOKEN = 'pk.eyJ1IjoieWlrYWl5YW5nIiwiYSI6ImNqaXJ5eXd6MDBhOGwzcGxvMmUwZGxsaDkifQ.Czx2MTe4B6ynlMbpW52Svw'
 
@@ -31,6 +35,9 @@ const TOKEN = 'pk.eyJ1IjoieWlrYWl5YW5nIiwiYSI6ImNqaXJ5eXd6MDBhOGwzcGxvMmUwZGxsaD
     MapComponent
   ],
   imports: [
+    CheckboxModule,
+    InputTextModule,
+    SliderModule,
     ChipModule,
     DividerModule,
     SelectButtonModule,

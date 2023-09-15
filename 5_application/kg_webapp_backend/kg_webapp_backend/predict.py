@@ -49,3 +49,4 @@ def predict_tail(head_node_id, relationship, model_name):
         )
         pred = pred.df['tail_label'].head(5).to_list()
     return pred
+

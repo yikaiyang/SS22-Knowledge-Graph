@@ -12,7 +12,6 @@ export interface RelatedNodeResponse {
   }
   
   export interface Location {
-    entity_type: string
     node_id: string
     latitude: number
     longitude: number
