@@ -442,8 +442,6 @@ The acquired datasets contained many values that may not be necessary or suitabl
 
 Since the data was fetched from multiple datasources and each individual script was started at different timings, there is a discrepancy in the collected timestamps of each dataset due to the different request time intervals. Since it is required to combine the different datasets into a single Knowledge Graph the timestamps were rounded in full 20 minutes steps (e.g. 13:32 -> 13:40, and 13:28 -> 13:20) using the script```/documents/match_date_column.py```
 
-
-
 *Note: Please disable authentication in NEO4J prior by setting: dbms.security.auth_enabled=false in the NEO4J configuration file.*
 
 
@@ -493,19 +491,20 @@ For the integration to the Neo4J database a script 'main.py' which can be found 
 It starts with the deletion of the database and proceeds with the creation of all entities and nodes subsequently relationships. The implementation of those individual creation functions can be found in the file 'data_integration.py'.
 
 
-## 4. Training: Embeddings
+## 4. Knowledge Graph Embeddings
 (LO1) To train the embedding model the Python library Pykeen (https://pykeen.github.io) was used. 
 
 For training of the dataset, the same KG models were used, as by the authors of the paper: TransE, TransH, TransD. In addition the model RotatE, and ConvE were added to introduce different concepts (Complex plane / CNN) to the evaluation. 
 
-In the following a statistical breakdown of the dataset characteristics is listed:
+In the following a statistical breakdown of the distribution between entities and their total counts in the dataset is given:
+
+<b>Number of Entities / Triplets / Relationships </b>
 
 | Entities | Triplets | Relationships |
 | -------- | -------- | ------------- |
 | 1906     | 13006    | 8             |
 
-
-Distribution of entities:
+<b>Distribution of Entities:</b>
 
 |Entity/Label   |Count   |
 |---|---|
@@ -519,7 +518,24 @@ Distribution of entities:
 |Incident   |3   |
 
 
+
+In the following the distribution of all relationships in the knowledge graph is given. In addition, information about the properties are described, since specific Knowledge Graph Embeddings perform better or worse when encountering certain properties. 
+
+|Relationship   |Count   |Properties |Justification |
+|---|---|---|---|
+|ROAD_DATE  |4723   |Non-Reflexive, Antisymmetric, 1-to-N   |The relationship 'ROAD_DATE' connects a Road entity with a Date entitiy. It connect a Road point with time-dependent data, such as TrafficSituations and Incidents. The relationship is anti-symmetric, and uni-directional since it is not possible to infer any information of a road point from a given date. Each Road entity is connected to every Time entity when accordingly information was collected (TrafficSitutation, etc..) which puts it in a 1-to-N relationship |
+|IS_CONNECTED   |2994   |Non-Reflexive, (Large portions) Symmetric, 1-to-N    |'IS_CONNECTED' connects two 'Road' entities, i.e. means that a road goes from A to B. In most cases road networks are bi-directional (symmetric), however this may not the case everywhere since there a road-segments which are uni-directional, hence why 'large portions'. A single road point may be connected to multiple other road points, hence 1-to-N  |
+|IS_LOCATED   |2624   |Non-Reflexive, Antisymmetric, 1-to-N   |The relationship 'IS_LOCATED' connects a POI entity to a road entity and means semantically that a POI is nearby a specific Road point stored in the KG. In this KG, it is modelled as an unidirectional anti-symmetric relationship from a POI towards a Road entity for the sake of simplicity. In theory this relationship could be modelled symmetric however. Furthermore from the viewpoint of cardinality it is a 1-to-N relationship since a single POI can be located in the vicinity of multiple road points.|
+|HAS_TRAFFIC_SITUATION   |1260   |Non-Reflexive, Antisymmetric, ("Compositional") 1-to-N    |The relationship "HAS_TRAFFIC_SITUATION" connects unidirectionally the entities "Time" to "TrafficSituation". Time hereby is referred only as the daytime (5:00). Semantically it means that at a certain time (e.g. 4:00) a trafficsituation occured (e.g. 12.0) which would mean that at 4am the average traffic speed was at 12km/h. It is a 1-to-N relationship since given a daytime there could be multiple traffic-speeds occuring since it only encodes the daytime and not the date (which is an entirely seperate entity). Furthermore, it can be argued that this relationship in it's essence is actually compositional since it only makes sense when combined with the entity Road. (A Trafficsituation only occurs in conjunction during a specific Time and Date and at specific Road) Those entities (Road, and TrafficSituation) are however not directly connected with each other but are rather interconnected through multiple seperate entities: (Road)-[:ROAD_DATE]->(Date)-[:DATE_TIME]->(Time)-[:HAS_TRAFFIC_SITUATION]->(TrafficSituation)|
+|DATE_TIME   |505  |Non-Reflexive, Antisymmetrical, 1-to-N   |The relationship 'DATE_TIME' connects uni-directionally the entities 'Date' and 'Time'. To reduce the number of total entities and enable a more efficient database schema the datetime was split into two separate entities (Date, and Time). However, this necessitates the relationship ('DATE_TIME') which interconnects those entities. It is a 1-to-N relationship  |
+|HAS_TEMPERATURE   |495   |Non-Reflexive, Antisymmetrical, 1-to-N    |The relationship 'HAS_TEMPERATURE' provides a uni-directional connection between the entity 'Time' and 'Temperature' similarly to the relationship 'HAS_TRAFFIC_SITUATION', it encodes an event which occurs during a specific time. Since there could be multiple temperature measurements on multiple days it is a 1-to-N relationship. It is not a compositional relationship since the temperature is not tied to a specific spatial locality but rather happens globally, and hence is only related towards time and day. |
+|HAS_INCIDENT   |191   |Non-Reflexive, Antisymmetrical, 1-to-N, ("Compositional")    |The relationship 'HAS_INCIDENT' connects a Time entity uni-directionally with an Incident entity. Semantically it means that at a certain Date and Time an Incident occured at a Street Point. With regard to properties, it is basically the same as the relationship of 'HAS_TRAFFIC_SITUATION' and thus has the same properties (1-to-N, Compositional, Antisymmetrical). |
+|HAS_WEATHER   |189   |Non-Reflexive, Antisymmetrical, 1-to-N    |The relationship 'HAS_WEATHER' connects a Time entity with a Weather entity. It behaves the same as the 'HAS_TEMPERATURE' relationship and has the same properties |
+|IS_NEARBY   |25   |Non-Reflexive, Antisymmetrical, 1-to-N    |The relationship 'IS_NEARBY' connects the entities "Incident" and "Road" and means semantically that an Incident happened nearby a specific Road - street point. Since this relationship does not exist in the initial dataset it has been created during the data processing phase. Hereby, the nearest 5 Roads are calculated for a single incident which makes this relationship a 1-to-N relationship. Furthermore it is unidirectional and hence anti-symmetrical by design choice.|
+
+
 ## Results
+Using the framework PyKeen the listed embeddings were trained by using the hold-out method with a training / evaluation / test - split ratio of 80%/10%/10%.
 
 <h3>Head Entity Prediction (Epochs=50)</h3>
 
@@ -540,6 +556,8 @@ Distribution of entities:
 |RotatE   |**215.44542659492697**   |44.08%   |42.54%   |39.32%   |
 |ConvE   |343.7129131437356   |46.93%   |37.39%   |30.55%   |
 
+
+<hr/>
 <h3>Head Entity Prediction (Epochs=100)</h3>
 
 |Model   |MR   |hits@10 |hits@3 | hits@1|
@@ -559,14 +577,112 @@ Distribution of entities:
 |**RotatE**   |10.744427363566487   |**79.05%**   |**67.52%**   |**62.26%**   |
 |ConvE   |79.61337432744043   |62.49%   |59.07%   |52.46%   |
 
+<hr/>
 
-## Interpretation
-(LO1) In contrast to the findings in the paper by Tan et. al. where the model TransD performed the best, the model TransH performs the best in both Head and Tail-Entity prediction with substantially better results than the other models in all metrics. The reason for this observation could be found in a large number of 1-to-N relationships between the entity 'DateTime' and other entities, since almost every entity except for the type POI is connected to a 'DateTime'. All models seem to perform the best when trained with the number of epochs set to 500-1000 with the performance degrading.  TransH, in contrast to other models uses a hyperplane to model the relationship and hence is able to encode 1-to-N relationships between entities. In theory, the CNN-based ConvE should also do well on n-ary relationships similar to TransH, however during the evaluation seemingly does not yield significantly better results than the other models. Without having a thorough inspection it may be likely that few of the hyperparameters may not be suitable for this project, for example the convolutional mask could be too large / or small and hence causes wrong classifications. What becomes clear though is that the head entity prediction performance using ConvE is severely lacking with a meager accuracy of around 0-6% in all hits@10, hits@3, hits@1 metrics. However this is expected since the underlying Convolutional Neural Network in ConvE works only in one direction.   
+<h3>Head Entity Prediction (Epochs=200)</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |13.30284396617986   |76.21%   |49.35%   |39.12%   |
+|TransE   |51.73635664873174   |64.91%   |56.03%   |46.08%   |
+|TransH   |**8.574558032282859**   |75.83%   |64.03%   |**51.04%**   |
+|**RotatE**   |13.443120676402767   |**80.71%**   |**66.99%**   |51.00%   |
+|ConvE   |160.67140661029978   |43.35%   |28.25%   |14.53%   |
+<h3>Tail Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |12.627978478093773   |76.59%   |63.45%   |42.24%   |
+|TransE   |45.26825518831668   |65.95%   |58.30%   |47.35%   |
+|TransH   |**9.043812451960031**   |75.63%   |64.03%   |58.57%   |
+|**RotatE**   |11.03305149884704   |**77.56%**   |**66.68%**   |**62.03%**   |
+|ConvE   |77.24980784012298   |60.61%   |47.62%   |32.17%   |
+
+<hr/>
+
+<h3>Head Entity Prediction (Epochs=400)</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |13.829362029208301   |77.33%   |46.46%   |28.40%   |
+|TransE   |41.484627209838585   |62.03%   |49.42%   |33.82%   |
+|TransH   |**8.581475787855496**   |76.25%   |64.18%   |41.81%   |
+|**RotatE**   |16.662567255956954   |**77.02%**   |**64.49%**   |**48.89%**   |
+|ConvE   |175.71598770176786   |51.19%   |38.78%   |24.71%   |
+<h3>Tail Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1|
+|---|---|---|---|---|
+|TransD   |12.52229054573405   |**76.29%**   |55.50%   |30.28%   |
+|**TransH**   |**9.340122982321292**   |75.83%   |**63.68%**   |**57.96%**   |
+|TransE   |32.1510376633359   |64.64%   |50.81%   |35.20%   |
+|RotatE   |15.956571867794004   |71.60%   |54.65%   |43.62%   |
+|ConvE   |97.64911606456572   |40.12%   |23.17%   |13.11%   |
+
+<hr/>
+
+<hr/>
+
+<h2>Overall Best Results</h2>
+
+<h3>Head Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1| Epochs|
+|---|---|---|---|---|---|
+|TransD   |13.829362029208301   |77.33%   |46.46%   |28.40%   |400  |
+|TransH   |9.340122982321292   |75.83%   |63.68%   |57.96%   |200   |
+|TransE   |32.1510376633359   |64.91%   |56.03%    |46.08%   |100   |
+|**RotatE**   |11.03305149884704   |77.56%   |66.68%   |62.03%   |200 |
+|ConvE   |175.71598770176786   |51.19%   |38.78%   |24.71%   |400|
+
+<h3>Tail Entity Prediction</h3>
+
+|Model   |MR   |hits@10 |hits@3 | hits@1| Epochs|
+|---|---|---|---|---|---|
+|TransD   |12.627978478093773   |76.59%   |63.45%   |42.24%   |400  |
+|TransH   |**9.043812451960031**   |75.63%   |64.03%   |58.57%   |200   |
+|TransE   |73.92736356648732   |63.57%   |59.34%   |54.15%   |100   |
+|**RotatE**   |11.03305149884704   |**77.56%**   |**66.68%**   |**62.03%**   |200   |
+|ConvE   |79.61337432744043   |62.49%   |59.07%   |52.46%   | 100|
+
+
+## Result Interpretation
+(LO1) In contrast to the findings in the paper by Tan et. al. where the model TransD performed the best, the model RotatE is the best performing model in both Head and Tail entity prediction followed by the model TransH. The reason for the relatively good performance of TransH could be found in a large number of 1-to-N relationships in the KG. However, models which are not known to support this property are seemingly performing relatively well at least in the categories (hits@10, hits@3). The discrepancy becomes larger when observing the category hits@1. Surprisingly, the model RotatE outperforms TransH even though the model is only known to be able to handle rudimentally 1-to-N relationships. 
+
+
+## Model Characteristics
+(LO1) RotatE is a model which utilizes the complex plane to encode the relationship r of a triple (h,r,t) as a rotation from the two entities h, and t encoded in the complex plane. In contrast to the models TransE, TransH, and TransD the model RotatE is able to support all the properties "Symmetry", "Antisymmetry", "Inversion", and "Composition".
+
+TransD is an embedding where a triple (h,r,t) is encoded by using two vectors for each of h,r,t. Similarly to TransR it defines seperate spaces for relations and entities by defining mapping matrices \textit{Mr}. However, in contrast to TransR 
+
+
+|---|---|---|---|---|---|
+|Model   |Symmetry   |Antisymmetry |Inversion |Composition | 1-to-N |
+|TransE   |-   |&#10004;   |&#10004;   |&#10004;   | - |
+|RotatE   |&#10004;   |&#10004;   |&#10004;    |&#10004;    |   -   |
+|TransD   |&#10004;<sup>1</sup>    |&#10004;<sup>1</sup>    |&#10004;<sup>1</sup>    |- <sup>1 (?)</sup>    |&#10004;<sup>1</sup>   |
+|TransH   |&#10004;<sup>2</sup>  (?)   |&#10004;<sup>2</sup> (?)     |&#10004;<sup>2</sup> (?)     |&#10004;<sup>2</sup> (?)      |&#10004;<sup>2</sup> (?)   |
+|ConvE   |(?)<sup>3</sup>    |(?)<sup>3</sup>     |(?)<sup>3</sup>      |(?)<sup>3</sup>     |(?)<sup>3</sup>|
+
+Source: Lecture slides: "KG Embeddings - A Glimpse Beyond", Page 5 (Original Source: RotatE Paper). The properties of the models: TransD, TransH, ConvE are not decribed by their accompanying papers but rather using my own research / ideas which may be wrong.
+
+1= According to the authors of the paper, TransD can be a special case of TransE: "TransE is a special case of TransD when the dimension of vectors satisfies m = n and all projection vectors are set zero.", hence it should be possible for TransD to satisfy all properties of TransE "Antisymmetry, Inversion, Composition". However, a more realistic approach would be to infer the properties from the model TransR which is conceptually very similar. In TransR, TransD different spaces are created for entities and relationships. The entities are projected to the relationship space by using a projection vector applied on the entity space. In TransR is possible to model all properties in the same fashion as TransE in relational space, besides of composition since each relation is depicted in it's own space. (Source: Stanford CS22W by Prof. Leskovec, <https://www.youtube.com/watch?v=Xm5VrxZYhu4>) TransD still maps to a relational space but is not using a singular projection vector r<sub>p</sub> for the relationship but rather uses a combination of projection vectors for the head and the relationship itself <h<sub>p</sub>, r<sub>p</sub>>. However the fact that it maps towards a relational space remains, and hence in my opinion it should not support compositional relationships like TransR.
+
+2 = Not explicitly declared in the paper, but since TransH is similar to TransE except for the introduction of a hyperplane instead of a translational vector, it should inherit the same properties as TransE. In addition to TransE, symmetry for TransH in theory should be achievable when the hyperplane is aligned, such that both head and tail are intersected by the hyperplane.
+
+3 = Not explicitly declared in the paper. ConvE is based on a CNN, and hence has to be trained to be able to recognize patterns from the dataset (triplets). While it does not inherently support those properties from the beginning, it is likely that the underlying CNN is capable to learn some of the patterns of the properties, however this likely highly depends on the training process and selection of hyperparameters, and of course the underlying architecture of ConvE as well.
+
+1-to-N relationships:
+With regard to 1-to-N relationships, it is not "possible" to elegantly model those in TransE since relationships are depicted as a translational vector, hence each entity of the n-ary relationship would be mapped to very similar positions, creating clusters, rendering them difficult to distinguish from each other. Similarly, in RotatE a rotation is applied instead of a translation which conceptually is similar to TransE. In the opinion of the RotatE authors however this is sufficient since one could utilize the distance function from the point where the relational vector/rotation is pointing at and the n-ary elements and could further be improved on using probabilistic methods <https://openreview.net/forum?id=HkgEQnRqYQ&noteId=B1gmLa420X>. TransH uses a hyperplane to depict the relation which allows it to resemble 1-to-N relationships by intersecting the tail entities with the hyperplane. TransD is an extension of the TransR model and maps entities and relationships to a seperate relational space. Since it is possible to map two totally different tail entities to the same position in the relational space, 1-to-N relationships are fully supported by this model. ConvE assigns each <head, relationship> tuple an individual score for each tail entity (classes), as such in an 1-to-N relationship entities of the n-ary side must receive the same score. Whether this works well in practise is not described in the accompanying paper, but could be tested by using a dataset featuring a large number of those relationships. 
 
 
 
-At the first glance, the velocity of cars seems to be very slow with no street points measuring speeds above 18km/h. However, this is likely due to the mapping service sampling the velocities and thus returning the average velocity over a timeframe. 
 
+The models seem to perform best with the number of epochs set in the range of around 200.   
+
+All models seem to perform the best when trained with the number of epochs set to 100 with the performance degrading. TransH, in contrast to other models uses a hyperplane to model the relationship and hence is able to encode 1-to-N relationships between entities. In theory, the CNN-based ConvE should also do well on n-ary relationships similar to TransH, however during the evaluation seemingly does not yield significantly better results than the other models. Without having a thorough inspection it may be likely that few of the hyperparameters may not be suitable for this project, for example the convolutional mask could be too large / or small and hence causes wrong classifications. 
+
+At the first glance, the car velocities seem to be very slow with no street points measuring velocities above 18km/h compared to speed limits of up to 50km/ at certain street points. However, this is likely due to the mapping service sampling the velocities and thus returning the average velocity over a timeframe which is more in line of what was returned from the service. 
 
 ## Real world use-case evaluation
 In this segment, the trained model is evaluated against scenarios that are more situated in the real world. 
@@ -618,7 +734,7 @@ Designing an IT architecture for any complex AI applications is a challenge, typ
 
 While storing Knowledge Graphs is an important endeavour in itself, using it to derive new data, insights or other output, is a central service offered by a Knowledge Graph. Typically, for simple questions this is called querying, and for more complex questions and if it requires background knowledge, reasoning. Reasoning is a broad area, and in this part, we will focus on the representations and models most important for Knowledge Graphs: reasoning with KG Embeddings, logical knowledge that allows both full recursion as well as object creation, as well as Graph Neural Networks. We will also consider what it means to reason by combining these aspects.
 
-In terms of the KG embedding component, since most KG embeddings are not transferable and to my knowledge do not support incremental learning, scalability likely poses a big challenge when using a non-static KG which evolves over time, such as in this submission project a KG capturing traffic data. However there is research under way and the paper "Lifelong Embedding Learning and Transfer for Growing Knowledge Graphs" by Cui et. al. introduces the "LKGE" embedding model which takes existing embeddings and fits them to new KG data by using an autoencoder. For now being, the optimal solution is likely to train KGE using snapshots of the KG at specific times, and update the model in a periodical time-frame or when necessary. 
+In terms of the KG embeddings, since most KG embeddings are transductive and to my knowledge do not support incremental learning, scalability likely poses a big challenge when using a non-static KG which evolves over time, such as in this submission project a KG capturing traffic data. However there is research under way and the paper "Lifelong Embedding Learning and Transfer for Growing Knowledge Graphs" by Cui et. al. introduces the "LKGE" (Lifelong Knowledge Graph Embedding) embedding model which takes existing embeddings and fits them to new unseen KG data by using an autoencoder. For now being, the optimal solution is likely to train KGE using snapshots of the KG at specific times, and update the model in a periodical time-frame or when necessary. 
 
 With the current KG schema design the modelling of time poses a great issue in terms of scalability, since for each unit of time a new node / entitiy, in addition to it's relationships to other entities, has to be introduced to the graph. This will result in the KG being bloated with nodes containing time units, likely taking the majority of all entities / relationships in the graph database. A more efficient way to store time would be to introduce concepts like time-trees where not the entire datetime timestamp is stored as a single node, but is split into multiple nodes for each day, month, year, hour and minute unit, and a time representation is then assembled by connecting those units of time.
 
@@ -636,7 +752,7 @@ Applications
 
 Systems and representations are central to this course, but hardly motivated without applications. We will give a broad coverage of real-world applications in many sectors, including: the finance sector, energy sector, logistics and supply chain sector, manufacturing sector, aerospace sector and many others. Our goal is to explore the actual real-world applications of Knowledge Graphs, and learn from them which parts of the broad field of KG techniques are used where, and how to use this for designing such data science and computer science applications ourselves.
 
-In this submission a custom road network knowledge graph was created. The aim of this project was to enable traffic planners or other specialists to see or explore relationships between certain POIs (Points of Interests), street points and road traffic data points. For that data from various datasources were acquired: 1. Foursquare API for POIs, 2. OpenWeatherMap for weather data (temperature / weather condition), 3. HERE Maps API for modelling the road network, as well as road incidents (car accidents / road blocks), and car traffic volume in the form of the average traffic speed. 
+In this project a custom road network knowledge graph was created. The aim of this project was to enable traffic planners or other specialists to see or explore relationships between certain POIs (Points of Interests), street points and road traffic data points. For that data from various datasources were acquired: 1. Foursquare API for POIs, 2. OpenWeatherMap for weather data (temperature / weather condition), 3. HERE Maps API for modelling the road network, as well as road incidents (car accidents / road blocks), and car traffic volume in the form of the average traffic speed. 
 
 
 (LO11) Apply a system to provide services through a Knowledge Graph
@@ -647,10 +763,13 @@ As a final step of creating and then involving a KG, we here give a glimpse into
 
 It is clear that Knowledge Graphs are an area of Artificial Intelligence where a number of techniques come together, and where new Machine Learning techniques such as KG Embeddings native to KGs have emergence. Arguably, it is one of the strengths of KG-based systems to allow all such techniques to come together in a well-organized architecture (some call it a “melting pot”). Yet, is all of KGs Artificial Intelligence? What about database systems and highly-scalable data processing techniques? A particularly interesting angle here are the reasoning techniques: How are traditional logic-based reasoning techniques coming together with Machine Learning-based ones? What is the connection to Neural Network-based methods, in particular those where the KG plays a central role (such as in GNNs)? These are questions we will openly consider in this part to allow everyone to not only understand the individual techniques, but how they connect to each other in KGs.
 
-(LO12) Modern KG systems consist of multiple components which have their origins in other areas of computer science, such as database systems, AI, etc. However, while there are certainly overlaps to other areas these are not completely identical since KG systems have specific demands. For example to store the data in a KG, database systems must be used. Traditionally, KG systems do rely on graph-based database systems in contrast to relational, or document-based systems which are more commonly used in traditional software engineering. Those graph-based systems are often tailored to accomodate the needs of a KG, such as more convenient relational queries, the option to store semantic meaning (RDF), even with features such as in-built reasoners in for example GraphDB by Ontotext. Similarly can be said about AI, where techniques from there are used in combination with KGs, such as Neural Networks. Techniques such as embeddings allowed the creation of KG-Embeddings which is itself a novel area and specifically tailored to be used in KGs. Traditional logic-based reasoners  derive information based on existing facts and relationships stored in the KG by using fixed rule-sets (e.g. first-order logic), while machine learning approaches are often using probabilistic methods. Hence, logic-based reasoner are better to derive information when logical consistency / correctness is required, however is lacking in areas when new information has to be derived from the KG which may not be explicitly modelled in the KG, besides from other different characteristics such as in runtime behaviour or the requirement for computation time for training machine learning models. Both techniques can be combined however, for example logic-based reasoners could be used to pre-filter data from the KG to reduce the input and hence the training size for machine-learning based reasoners. Or a logic-based filtering can be applied to the predictions of ML-reasoners afterwards to retrieve logically correct results. Graph Neural Networks in contrast uses information from the neighbourhood to gain understanding about link or node predictions. Hence, it may be more suitable for more tasks which involves the notion of spatiality.  which is inductive in contrast to KG-Embeddings and thus can be applied on . 
-
+(LO12) Modern KG systems consist of multiple components that have their origins in other areas of computer science, such as database systems, AI, etc. However, while there are certainly overlaps to other areas these are not completely identical since KG systems have specific demands. For example to store the data in a KG, database systems must be used. Traditionally, KG systems do rely on graph-based database systems in contrast to relational, or document-based systems which are more commonly used in traditional software engineering. Those graph-based systems are often tailored to accomodate the needs of a KG, such as more convenient relational queries, the option to store semantic meaning (RDF), even with features such as in-built reasoners in for example GraphDB by Ontotext. 
+Similarly can be said about AI, where techniques from there are used in combination with KGs, such as Neural Networks. Techniques such as embeddings allowed the creation of KG-Embeddings which is itself a novel area and specifically tailored to be used in KGs. Traditional logic-based reasoners  derive information based on existing facts and relationships stored in the KG by using fixed rule-sets (e.g. first-order logic), while machine learning approaches are often using probabilistic methods. Hence, logic-based reasoner are better to derive information when logical consistency / correctness is required, however is lacking in areas when new information has to be derived from the KG which may not be explicitly modelled in the KG, besides from other different characteristics such as in runtime behaviour or the requirement for computation time when training machine learning models. Both techniques can be combined however, for example logic-based reasoners could be used to pre-filter data from the KG to reduce the input and hence the training size for machine-learning based reasoners. Or a logic-based filtering can be applied to the predictions of ML-reasoners afterwards to retrieve logically correct results. Knowledge Graph Embeddings, and Graph Neural Networks are the most commonly used ML techniques applied to KGs. As taught in the lecture KG-Embeddings is based on transductive reasoning while Graph Neural Networks in contrast are based on inductive reasoning and hence capable of generalization. Through this GNNs are capable to operate on unseen nodes or edges, while KG-Embeddings need to be retrained for this use-case. Furthermore it embeds information of it's neighbourhood via message-passing and hence may be more suitable for tasks which involve the notion of spatiality. 
 Outside of AI, KG systems certainly do also have points of contact with other various areas in Computer Science as well such as in for example in Distributed Computing, or Business Intelligence where specialized techniques such as Stream Processing, Data Warehousing, Horizontal Scaling Techniques can be used to facilitate in preprocessing, maintainance and operation of KGs
 Each technology comes with it's own advantages and disadvantages, and their own set of ideal use-cases. For example as was showcased in this project, KG embeddings seem to not really work well on link prediction when used for forecasting the traffic volume in a time-dependent setting. For that traditional GNN, or CNN-based models are likely better suited for those tasks.
 In short, KG systems are not entirely made up from AI, however since there are currently many innovations happening in AI which enable many novel techniques and hence use-cases, such as KG-Embeddings, it may seem that KGs are made entirely up of AI. 
 
 From what could be observed is that there is not a single system that trumps others. Implementing a route planning system 
+
+
+In hing-sight it would have been more interesting to explore the GNN-side in this project a little bit more s. 
