@@ -3,19 +3,24 @@
         [listStyle]="{'max-height': '22rem'}" (onChange)="onRelationshipChange()">
         <ng-template pTemplate="header">
             <div>
-                <div class="font-bold mb-2">RELATIONSHIP:</div>
-                <p-dropdown [options]="relationships" [(ngModel)]="selectedRelationship"
-                    (onChange)="onRelationshipChange()"></p-dropdown>
-                <div class="mt-2">
-                    <p-selectButton (onOptionClick)="onSelectTabMenuItem()" [options]="tab_menu_options"
-                        [(ngModel)]="selected_tab_menu_option" styleClass="p-select-button-sm"></p-selectButton>
-                </div>
-                <div *ngIf="selected_tab_menu_option == tab_menu_options[1]">
-                    <p-divider></p-divider>
-                    <div class="font-bold font-xs mb-2">MODEL:</div>
-                    <p-dropdown [options]="models" [(ngModel)]="selectedModel" (onChange)="onTabSelect()"></p-dropdown>
+                <div class="text-sm">LAT: {{selectedLocation.latitude}} <br/> LNG: {{selectedLocation.longitude}} <br/> NODE ID: {{selectedLocation.node_id}}</div>
+                <hr/>
+                <div>
+                    <div class="font-bold mb-2">RELATIONSHIP:</div>
+                    <p-dropdown [options]="relationships" [(ngModel)]="selectedRelationship"
+                        (onChange)="onRelationshipChange()"></p-dropdown>
+                    <div class="mt-2">
+                        <p-selectButton (onOptionClick)="onSelectTabMenuItem()" [options]="tab_menu_options"
+                            [(ngModel)]="selected_tab_menu_option" styleClass="p-select-button-sm"></p-selectButton>
+                    </div>
+                    <div *ngIf="selected_tab_menu_option == tab_menu_options[1]">
+                        <p-divider></p-divider>
+                        <div class="font-bold font-xs mb-2">MODEL:</div>
+                        <p-dropdown [options]="models" [(ngModel)]="selectedModel" (onChange)="onTabSelect()"></p-dropdown>
+                    </div>
                 </div>
             </div>
+            
         </ng-template>
         <ng-template let-item pTemplate="item">
             <div>{{item.name}}

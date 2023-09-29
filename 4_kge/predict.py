@@ -43,7 +43,7 @@ def predict_tail(head_node_id, relationship):
 ### I am not sure why the conversion of neo4j node ids to pykeen internal ids seems to be broken. 
 # For now it seems that a monkey patch in the form of a custom method 'entity_to_id' is necessary
 #a = tf.entities_to_ids([3034]) Does not work
-a = entity_to_id(3034)
+a = entity_to_d(3034)
 
 print(a)
 #result = predict_tail(2094, 'HAS_INCIDENT')
