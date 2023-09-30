@@ -165,7 +165,7 @@ Using the Foursquare API, a list of the top 50 most relevant locations of each o
 
 As reference the API is documented at the following website: https://location.foursquare.com/places/docs/categories 
 
-![Ontology of this project](/documents/map_area/street_collection_points.png)
+<img src="documents/map_area/street_collection_points.png"></img>
 *Traffic data of all locations colored in blue were collected*
 
 ### Collection Timespan
@@ -193,10 +193,10 @@ Due to the simplification of 'Intersection', 'Road Section' and 'Road' nodes to 
 
 Other than that no major changes were made to the existing ontology which seem to follow best practices. The number of nodes of the entity 'Points of Interest' could become too large to manage as a single node in the future, since every POI irrespective of their category is stored in a single node type. The node POI could be splitted up in multiple nodes, each resembling a category (Restaurant, Train station, School, etc.) and the notion of being a POI could be established using a relationship 'IS_POI' for example. For this exercise however, the existing solution should suffice.
 
-![Ontology by Tan et al.](/documents/ontology_graphic/ontology_paper.png)
+<img src="documents/ontology_graphic/ontology_paper.png"></img>
 *Original Ontology by Tan et al.*
 
-![Ontology of this project](/documents/ontology_graphic/ontology.png)
+<img src="documents/ontology_graphic/ontology.png"></img>
 *Modified Ontology used in this project*
 
 ### Data Model
@@ -217,12 +217,12 @@ Method 1: A vertice is created for each Time and Date entity, such that there ar
 To illustrate the problem, the following example is given:
 Let's suppose that there are two entities of type street: Street 1 and Street 2. Street 1 has the traffic situation 'GOOD' (green) at 14:00h, while at the same time the traffic situation at Street 2 is 'BAD' (red). When added to the ontology, it is now not possible anymore to determine which traffic situation belongs to which exact street. Moreover, every street in the ontology would now stand in relation to all traffic situations, no matter if those traffic situations had actually occured in their respective streets. E.g. Street 1 is now simultaneously associated to the traffic situation entities 'GOOD' and 'BAD', even though only the traffic situation 'GOOD' is only valid for Street 1.
 
-![Ontology_example_1](/documents/ontology_graphic/concrete_ontology_example_1.png)
+<img src="documents/ontology_graphic/concrete_ontology_example_1.png"></img>
 *Example of a concrete ontology where invalid relationships are introduced.*
 
 Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that an instance of the nodes will have to be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time-associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. multiple nodes with the value 14:00). However, having multiple nodes which represent the same thing is likely problematic when applied on KG embeddings since each node is treated seperately.
 
-![Ontology_example_2](/documents/ontology_graphic/concrete_ontology_example_2.png)
+<img src="documents/ontology_graphic/concrete_ontology_example_2.png"></img>
 *Example of a concrete ontology where an entity is created for each timestamp. Time entities, which represent the same time are not connected to each other.*
 
 
@@ -238,7 +238,7 @@ Another approach would be to extend the first solution by either creating an att
 ## Road Network Creation
 (LO7) A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have taken too much time for data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets using the following method: For every street the nearest 25 streets were computed, while only every i*5-th (i < 25) nearest street was then actually connected in the road network. The idea for applying this method is that it counteracts the formation of disconnected clusters, such that only streets that are very close are connected to each other, while streets in farther distances can not be reached. Obviously, constructing an artificial road network like this will not yield an accurate or correct representation of the real street network, and may distort the results of prediction tasks when applied to Knowledge Graph Embeddings.
 
-![Ontology_example_2](/documents/map_area/street_network.jpg)
+<img src="documents/map_area/street_network.jpg"></img>
 *Graph visualization of the street network produced by the approximation method*
 
 ## 3. Data Integration
@@ -253,7 +253,7 @@ It starts with the deletion of the database and proceeds with the creation of al
 
 <b>Note: A dump of the database can be found in the folder '/data_db_dump/neo4j.dump' and imported to Neo4J to skip all data processing / integration tasks</b>
 
-![Ontology_example_2](/documents/figures/app/neo4jdesktop.png)
+<img src="documents/figures/app/neo4jdesktop.png"></img>
 *Neo4J Browser after completed data integration*
 
  
