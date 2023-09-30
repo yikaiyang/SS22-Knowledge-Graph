@@ -16,10 +16,10 @@ if __name__ == "__main__":
     transform_poi()
     
     # 2) Second, data between datapoints are linked
-    #export_roads_list.export_all_roads()
- #   calc_nearby_roads.add_nearby_roads_to_roads_file()
- #   match_date_column.match_date_column()
- #   match_speed.match_speed() #Rounds speed of data
+    export_roads_list.export_all_roads()
+    calc_nearby_roads.add_nearby_roads_to_roads_file()
+    match_date_column.match_date_column()
+    match_speed.match_speed() #Rounds speed of data
     poi_calc_nearby_roads()
 
     

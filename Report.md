@@ -21,9 +21,38 @@ In this project various Knowledge Graph Embeddings are trained and evaluated bas
 5. <b>Application - Web UI and backend service:</b> </br>
 This project creates a prototypical Web UI to demonstrate how a KG could serve an potential user, or specialist in the domain of traffic planner.
 6. <b>Learning Goals:</b> </br>
-To fulfill the learning goals of this lecture, various components that does not fit in the other projects otherwise are implemented here.
-7. <b>Conclusion:</b> </br>
+To fulfill the learning goals of this lecture, various components that do not fit otherwise are implemented here.
+1. <b>Conclusion:</b> </br>
 In this chapter of this report a conclusion is drawn and the findings of the project are summarized.
+
+## Technical Architecture
+(LO 5)
+The technologies used for this project consist of the following:
+
+* NestJS/Node.JS/Python for data crawling from REST APIs
+* Python/Pandas for transforming the crawled data to a suitable format
+* Python for data integration to the database
+* Neo4J as the graph database
+* PyKeen for training Knowledge Graph Embedding models
+* Web UI using Angular 
+* Backend system based on Python / Django which accesses the Neo4J database and hosts the PyKeen models
+
+The application is not engineered as a singular application which starts all components at once,  but rather is splitted into multiple components which run independently. As such there is no startup script and each component has to be started manually by itself.
+
+The core component of the Knowledge Graph is the graph database system Neo4J which hosts all the data. As such it must be running before the data integration and also while it provides services to any users.
+
+To acquire the data, data crawlers must be initiated. The inner workings of this part is described in the chapter (1. Data acquisition) in more detail. The project files can be found in the folder (1_data_acquisition).
+
+As the second step, the collected data is then transformed which is described in the chapter (2. Data processing) in more detail. The project files can be found in the folder (2_data_processing) and can be started using the script 'main.py'
+
+The third step is to integrate the already processed data to the database and is described in the chapter (3. Data integration) in more detail. The project files can be found in the folder (3_data_integration) and can be started using the script 'main.py'
+
+As the fourth step KG-Embeddings are trained to enable prediction tasks in the KG. It is implemented as a Jupyter Notebook and can be found at the location ('4_kge/4_kge.ipynb'). Further information can be found in the chapter ('4 KGE - Knowledge Graph Embeddings')
+
+To provide services a Web UI was implemented using Angular in conjunction with a Django Python backend system using REST interfaces which is described in more detail in the chapter (5. Application - Web UI and backend service).
+
+<hr/>
+(LO 5) As can be seen by the architecture of this application providing services using a KG does not only involve a graph database, but needs a whole ecosystem of multiple components, even with technologies that do not necesarily have a lot to do with KGs. In a more professional environment however, it is very likely that those components do not have to be run manually, but are executed in an automated manner such as with CRON-jobs or more sophisticated systems like stream-processing are implemented to process and integrate the data in realtime if the KG is very time-sensitive. Due to the simple nature of this project this Neo4J can be run locally without the need for cluster ressources which may be necessary for large KGs. For the tasks of this exercise however the architecture introduced here should suffice.
 
 
 ## 1. Data acquisition
@@ -33,7 +62,7 @@ For this task, data from four different data resources,
 3. Weather data
 4. Points of interests
 
-were acquired, processed and then integrated into a single ontology:
+was acquired, processed and then integrated into a single ontology:
 
 ### 1.1 Road traffic data
 Road traffic data was acquired from the online mapping application HERE MAPS, which provides a publicly available REST-API to query realtime traffic data. [Here Maps - Road Traffic](https://developer.here.com/documentation/traffic-api/dev_guide/topics/getting-started/send-request.html)
@@ -75,294 +104,8 @@ The pathway encoded in GEOJSON encoding
                         16.36036,
                         48.233360000000005
                     ],
-                    [
-                        16.36293,
-                        48.228100000000005
-                    ],
-                    [
-                        16.366709999999998,
-                        48.224900000000005
-                    ],
-                    [
-                        16.367569999999997,
-                        48.22044
-                    ],
-                    [
-                        16.371689999999997,
-                        48.21678
-                    ],
-                    [
-                        16.37512,
-                        48.21278
-                    ],
-                    [
-                        16.38216,
-                        48.21118
-                    ],
-                    [
-                        16.386969999999998,
-                        48.21266
-                    ],
-                    [
-                        16.39332,
-                        48.21232
-                    ],
-                    [
-                        16.39606,
-                        48.20854
-                    ],
-                    [
-                        16.39658,
-                        48.20431
-                    ],
-                    [
-                        16.40173,
-                        48.201679999999996
-                    ],
-                    [
-                        16.40636,
-                        48.200649999999996
-                    ],
-                    [
-                        16.409969999999998,
-                        48.19665
-                    ],
-                    [
-                        16.40104,
-                        48.19104
-                    ],
-                    [
-                        16.395719999999997,
-                        48.18623
-                    ],
-                    [
-                        16.39212,
-                        48.18806
-                    ],
-                    [
-                        16.380959999999998,
-                        48.18818
-                    ],
-                    [
-                        16.372889999999998,
-                        48.18589
-                    ],
-                    [
-                        16.364649999999997,
-                        48.18314
-                    ],
-                    [
-                        16.358299999999996,
-                        48.180620000000005
-                    ],
-                    [
-                        16.352459999999997,
-                        48.17994
-                    ],
-                    [
-                        16.348169999999996,
-                        48.18085
-                    ],
-                    [
-                        16.345599999999997,
-                        48.18429
-                    ],
-                    [
-                        16.342509999999997,
-                        48.18806
-                    ],
-                    [
-                        16.339239999999997,
-                        48.18795
-                    ],
-                    [
-                        16.337529999999997,
-                        48.19092
-                    ],
-                    [
-                        16.3389,
-                        48.19516
-                    ],
-                    [
-                        16.337529999999997,
-                        48.20088
-                    ],
-                    [
-                        16.336669999999998,
-                        48.20614
-                    ],
-                    [
-                        16.338209999999997,
-                        48.20946
-                    ],
-                    [
-                        16.338729999999998,
-                        48.21255
-                    ],
-                    [
-                        16.341299999999997,
-                        48.21701
-                    ],
-                    [
-                        16.343359999999997,
-                        48.22124
-                    ],
-                    [
-                        16.348169999999996,
-                        48.223870000000005
-                    ],
-                    [
-                        16.349539999999998,
-                        48.22970000000001
-                    ],
-                    [
-                        16.354349999999997,
-                        48.232220000000005
-                    ],
-                    [
-                        16.3559,
-                        48.23279
-                    ],
-                    [
-                        16.36036,
-                        48.233360000000005
-                    ],
-                    [
-                        16.36293,
-                        48.228100000000005
-                    ],
-                    [
-                        16.366709999999998,
-                        48.224900000000005
-                    ],
-                    [
-                        16.367569999999997,
-                        48.22044
-                    ],
-                    [
-                        16.371689999999997,
-                        48.21678
-                    ],
-                    [
-                        16.37512,
-                        48.21278
-                    ],
-                    [
-                        16.38216,
-                        48.21118
-                    ],
-                    [
-                        16.386969999999998,
-                        48.21266
-                    ],
-                    [
-                        16.39332,
-                        48.21232
-                    ],
-                    [
-                        16.39606,
-                        48.20854
-                    ],
-                    [
-                        16.39658,
-                        48.20431
-                    ],
-                    [
-                        16.40173,
-                        48.201679999999996
-                    ],
-                    [
-                        16.40636,
-                        48.200649999999996
-                    ],
-                    [
-                        16.409969999999998,
-                        48.19665
-                    ],
-                    [
-                        16.40104,
-                        48.19104
-                    ],
-                    [
-                        16.395719999999997,
-                        48.18623
-                    ],
-                    [
-                        16.39212,
-                        48.18806
-                    ],
-                    [
-                        16.380959999999998,
-                        48.18818
-                    ],
-                    [
-                        16.372889999999998,
-                        48.18589
-                    ],
-                    [
-                        16.364649999999997,
-                        48.18314
-                    ],
-                    [
-                        16.358299999999996,
-                        48.180620000000005
-                    ],
-                    [
-                        16.352459999999997,
-                        48.17994
-                    ],
-                    [
-                        16.348169999999996,
-                        48.18085
-                    ],
-                    [
-                        16.345599999999997,
-                        48.18429
-                    ],
-                    [
-                        16.342509999999997,
-                        48.18806
-                    ],
-                    [
-                        16.339239999999997,
-                        48.18795
-                    ],
-                    [
-                        16.337529999999997,
-                        48.19092
-                    ],
-                    [
-                        16.3389,
-                        48.19516
-                    ],
-                    [
-                        16.337529999999997,
-                        48.20088
-                    ],
-                    [
-                        16.336669999999998,
-                        48.20614
-                    ],
-                    [
-                        16.338209999999997,
-                        48.20946
-                    ],
-                    [
-                        16.338729999999998,
-                        48.21255
-                    ],
-                    [
-                        16.341299999999997,
-                        48.21701
-                    ],
-                    [
-                        16.343359999999997,
-                        48.22124
-                    ],
-                    [
-                        16.348169999999996,
-                        48.223870000000005
-                    ],
+                    ....
+                    ,
                     [
                         16.349539999999998,
                         48.22970000000001
@@ -381,7 +124,7 @@ The pathway encoded in GEOJSON encoding
 
 
 
-The pathway encoded in Flexible-Polyline encoding:
+The same pathway encoded in Flexible-Polyline encoding:
 ```
 BF-usmJsw6jDyD8b7gBiQ_T0X7bsF7W4Z_YuV_JgsBoJiejC2nBzXkRtaoDtQmgBtG-c_YyWhjB53BhenhBuLvWY3lCpOtyBlRvzB3P1nBnEvkB2F5awVhQyXpTVtUyS1KwayI4jBxI8gBrF4U0JqToD8biQua8MuQieukByI4Pie
 ```
@@ -395,7 +138,13 @@ https://data.traffic.hereapi.com/v7/flow?in=corridor:BF-usmJsw6jDyD8b7gBiQ_T0X7b
 
 The returning HTTP response contains the data about the traffic situation of all street points (blue dots) at the time of the request depicted in the following figure:
 
-### Points of interests
+### 1.2 Road Incident Data
+Road incident data (Traffic incidents / Road closures) was also acquired by fetching from the REST API of the service HERE MAPS (https://developer.here.com/documentation/traffic-api/dev_guide/topics/getting-started/send-request.html)
+
+### 1.3  Weather data
+Weather, and temperature data was fetched from the service openweathermap.org. The exact API documentation can be found here: (https://openweathermap.org/api/one-call-3)
+
+### 1.4 Points of interests
 Using the Foursquare API, a list of the top 50 most relevant locations of each of the following POI categories (and their assigned category IDs in curved brackets) were fetched:
 
 <ul>
@@ -419,67 +168,72 @@ As reference the API is documented at the following website: https://location.fo
 ![Ontology of this project](/documents/map_area/street_collection_points.png)
 *Traffic data of all locations colored in blue were collected*
 
-
-
-### Road Incident Data
-Road incident data (Traffic incidents / Road closures) was also acquired by fetching from the REST API of the service HERE MAPS.  [Here Maps - Road Traffic](https://developer.here.com/documentation/traffic-api/dev_guide/topics/getting-started/send-request.html)
-
-
 ### Collection Timespan
 The data was collected over the timespan of 7 days from Fri, May 6th 2022 - 14:00 to Fri, May 13th 2022 - 17:00 using automated queries in a fixed time-interval of 20 minutes. Due to technical difficulties the data collection from the Traffic Incidents API started at a later time on Tue, March 10 16:45. Thus, the traffic incidents dataset is incomplete since it does not cover the full data collection time period of the other data ressources.
 
 
-### 2. Data processing
+## 2. Data processing
 (LO 7)
-Before the data can be loaded by the Neo4J database, it has to be processed to be transformed to the necessary format. Two steps had to be taken:
+Before the data can be loaded into the Neo4J database, it has to be processed and transformed to the necessary format. Two steps needs to be taken (in order):
 
-1. Data Linking:
-The data from multiple sources had to be merged, and connections to entities from the different datasets had to be established. For example the POI dataset did only contain a pair of geocoordinates (longitude, latitude) missing concrete connections to the streets where those are located. To 
+1. Data transformation:
+The acquired datasets contained many values that may not be necessary or suitable for the KG. Various values have to be removed or transformed to a different format or data-type to accomodate the needs of the KG. The script '2_data_processing/main.py' handles those tasks and overwrites the original files with the processed values.
 
-2. Data transformation:
-The acquired datasets contained many values that may not be necessary or suitable for the KG. Various values had to be removed or transformed to a different format or data-type to accomodate the needs of the KG.
+2. Data Linking:
+The data from multiple sources had to be merged, and connections to entities from the different datasets had to be established. For example the POI dataset did only contain a pair of geocoordinates (longitude, latitude) of it's own position and was missing concrete references to which streets it belongs to. The script '2_data_linking/main.py' handles those tasks and overwrites the original files with the processed values.
 
+Since the data was fetched from multiple datasources and each individual script was started at different timings, there is a discrepancy in the collected timestamps of each dataset due to the different request time intervals. Since it is required to combine the different datasets into a single Knowledge Graph the timestamps were rounded in full 20 minutes steps (e.g. 13:32 -> 13:40, and 13:28 -> 13:20) using the script ```/documents/match_date_column.py```
 
-Since the data was fetched from multiple datasources and each individual script was started at different timings, there is a discrepancy in the collected timestamps of each dataset due to the different request time intervals. Since it is required to combine the different datasets into a single Knowledge Graph the timestamps were rounded in full 20 minutes steps (e.g. 13:32 -> 13:40, and 13:28 -> 13:20) using the script```/documents/match_date_column.py```
-
-*Note: Please disable authentication in NEO4J prior by setting: dbms.security.auth_enabled=false in the NEO4J configuration file.*
 
 
 ## 3. Data Integration: Knowledge Graph Construction
-(LO7) The structure of the ontology is derived from the ontology presented in the paper by Tan et. al. However, some adjustments were made to incorporate weather and incident data:
+(LO7) The structure of the ontology is derived from the ontology presented in the paper by Tan et. al. However, some adjustments were made to incorporate additional data. Nodes were created which were not in the original KG, such as weather, temperature and incident nodes. Nodes that resemble data that is missing in my project (Intersection, Road section) were removed from my KG.
+
+Due to the simplification of 'Intersection', 'Road Section' and 'Road' nodes to a single Road node, the relationship 'IS_CONNECTED' was introduced which replaces both the 'link' and 'belong' relationships that interconnected Intersections with Roads, and Road segments. Hence, each 'Road' connects with other 'Road' entities using the reflexive relationship 'IS_CONNECTED'.
+
+Other than that no major changes were made to the existing ontology which seem to follow best practices. The number of nodes of the entity 'Points of Interest' could become too large to manage as a single node in the future, since every POI irrespective of their category is stored in a single node type. The node POI could be splitted up in multiple nodes, each resembling a category (Restaurant, Train station, School, etc.) and the notion of being a POI could be established using a relationship 'IS_POI' for example. For this exercise however, the existing solution should suffice.
 
 ![Ontology by Tan et al.](/documents/ontology_graphic/ontology_paper.png)
-*Fig.2: Original Ontology by Tan et al.*
-
-
+*Original Ontology by Tan et al.*
 
 ![Ontology of this project](/documents/ontology_graphic/ontology.png)
 *Modified Ontology used in this project*
 
-### 2.1. Modelling Time
-Due to the time-dependent nature of the data, especially in the transportation domain where the traffic situation is highly dynamic and changes based on the time of observation, time must be modelled or represented in the knowledge graph. The authors applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges. However, the modelling method used by the study authors raises some concerns.
+### Data Model
+(LO 4)
+To create Knowledge Graphs multiple data models and various technologies can be used. For example in the area of semantic web, RDF and OWL-based graph-based database technologies with built in reasoners are common. RDF and OWL introduces the concept of standardized vocabularies to describe entities and relationship for entities. Thus, the initial idea (Web 3.0) behind it was to create an interoperable large "Knowledge Graph" which allows the user to infer semantics based on a common description language.
+Another choice is to use a traditional relational database system and model the graph datastructure using Node and Edge tables. However, with this choice there will be 'heavy-lifting' required from the user, since those databases are not necessarily optimized for graph datastructures and one has to do a lot of manual work, e.g. indexing, manually joining across multiple tables in SQL. Graph database systems like Neo4J, GraphDB are more optimized for storing graph data-structures. With regard to other representation forms, it would be possible to store the graph using heuristical approaches by using for example adjacency matrices, edge-lists or other reconstruction algorithms like embeddings which are en- and de-codeable, or simply by using a sparse matrix. While this representation form is suitable for AI / Machine Learning tasks since those facilitate calculations with it, and is able to yield higher performances since it is more low-level, they are not common to be used for a business application. The disadvantage with those techniques is that they are missing the abstraction layer that provides a convenient way to access the data like one can do using query languages and hence are too difficult to operate in the context of normal business use-cases.
+Finally, one could use a graph database system without the need to use RDF or OWL, such as Neo4J which has been also used in this project. While RDF / OWL using e.g. GraphDB is perfectly fine to model the proposed KG, they are rather strict and enforces the usage of specific descriptors when creating the ontology. Since our project does not necessarily require a strict pre-defined schema, and neither integrates other RDF/OWL resources Neo4J is likely the best choice. In addition, no detailed knowledge of RDF/OWL or the query language SPARQL is required, which is an additional advantage for Neo4J.
 
-The construction using this method can be done in the following ways (which one the study authors were using is unclear):
+### 3.1. Modelling Time
+(LO7)
+Since certain relationships of the data is time-dependant domain, for example with the traffic situation being dynamic and changes based on different time and days, time must be modelled or represented in the knowledge graph. The authors Tan et. al. applied a method similarly to the Time-Tree model to the Neo4J database by introducing vertices representing the hour and minute values and connecting all entities associated with that time using edges. However, the modelling method used by the study authors raises some concerns.
 
-1) Method 1: Creation of date and time vertices only once, so that there are no duplicates of a timestamp in the entire knowledge graph, and create relationships between the entities associated with the timestamp. However, by using this approach, the information of the initial relationship chain between entities is lost, since now all entities associated with a specific time are also in relation to each other.
+The construction using this method can be done in the following ways (which one the study authors was using is unclear):
+
+Method 1: A vertice is created for each Time and Date entity, such that there are no duplicates of each Time and Date in the entire knowledge graph. (There is only a single vertice for Time ('14:00') and there is only a single node for Date ('1.2.2023) in the KG) Subsequently create relationships between all entities containing time-dependent relationships by connecting with their Time and Date vertices. However, by using this approach, relationships with other entities that were not initially in the dataset are established since now all entities associated with a specific time also are now in relation to each other, since .
+
 <br/> <br/>
 To illustrate the problem, the following example is given:
-Let's suppose that there are two entities of type street: Street 1 and Street 2. Street 1 has a favorable/good traffic situation (green) at 14:00h, while at the same time the traffic situation at Street 2 is bad (red). When added to the ontology, it is now not possible to determine which traffic situation belongs to which exact street. Moreover, every street in the ontology would now stand in relation to all traffic situations, no matter if those traffic situations had actually occured in the respective streets. E.g. Street 1 is now simultaneously associated to the traffic situation entities 'good' and 'bad', even though only the traffic situation 'good' is valid for Street 1.
+Let's suppose that there are two entities of type street: Street 1 and Street 2. Street 1 has the traffic situation 'GOOD' (green) at 14:00h, while at the same time the traffic situation at Street 2 is 'BAD' (red). When added to the ontology, it is now not possible anymore to determine which traffic situation belongs to which exact street. Moreover, every street in the ontology would now stand in relation to all traffic situations, no matter if those traffic situations had actually occured in their respective streets. E.g. Street 1 is now simultaneously associated to the traffic situation entities 'GOOD' and 'BAD', even though only the traffic situation 'GOOD' is only valid for Street 1.
 
 ![Ontology_example_1](/documents/ontology_graphic/concrete_ontology_example_1.png)
 *Example of a concrete ontology where invalid relationships are introduced.*
 
-2) Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that nodes will be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time-associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. multiple nodes with the value 14:00). Thus, the loss of semantics of time could play a role on how the predictions of KG embeddings turn out.
+Method 2: Creation of individual date and time vertices for every entity associated with a timestamp. This will incur that an instance of the nodes will have to be created for each time and hour for each entity associated with that timestamp. The advantage of this approach would be that it is able to preserve correctness between relationships of entities that are linked by time. The issue with this solution is now that each time-associated entity creates their own time entities, hence all time entities are distinct even if they have the same time value (e.g. multiple nodes with the value 14:00). However, having multiple nodes which represent the same thing is likely problematic when applied on KG embeddings since each node is treated seperately.
 
 ![Ontology_example_2](/documents/ontology_graphic/concrete_ontology_example_2.png)
 *Example of a concrete ontology where an entity is created for each timestamp. Time entities, which represent the same time are not connected to each other.*
+
 
 Since time dependent data is quite common in datasets, this area has been already researched and the optimal solution would likely be to use Knowledge Graph Embeddings specialized on temporal facts instead. Such as HyTE, which would be able to preserve temporal consistency. By using this method, the modelling of the ontology would change accordingly, as distinctive entities for representing time are not needed anymore, as seen in the following figure:
 
 ![Ontology_example_3](/documents/ontology_graphic/ontology-temporal.png)
 *Remodeled ontology with time entities removed by using incorporating time as an attribute in the relationships itself*
 
-Based on those observations and the fact that the relationship between the road entities and time entities is called 'road_date', it may can be implicitly assumed that the study authors have used method 2. Still, due to the large amounts of edges and nodes that would be needed to be created by using method 2, and the incurred higher processing power and hardware needs, it was decided to use method 1 for this exercise.
+Based on those observations and the fact that the relationship between the road entities and time entities is called 'road_date', it can be implicitly assumed that the study authors have used method 2. Still, due to the large amounts of edges and nodes that would be needed to be created by using method 2, and the incurred higher processing power and hardware needs, it was decided to use method 1 for this exercise.
+
+Another approach would be to extend the first solution by either creating an attribute which contains the IDs of the initial related entities, or by creating a new 'ASSOCIATED' relationship between those entities. While this would solve this problem for logical queries, the issue for traditional KGE would still remain, since those can only operate on singular relationship in a <h,r,t> triple and would not be able to consider the new ly introducted 'ASSOCIATED' relationship.
 
 ## Road Network Creation
 (LO7) A road network can be represented as a graph (V,E), where V (vertices) equals road intersection points, and E (edges) equals road segments. In the paper, data from OpenStreetMaps was fetched using the tool [OSM2GMNS](https://osm2gmns.readthedocs.io/en/latest/) and processed to model the road network. In this exercise submission, due to time constraints, it was refrained from extracting the street network data from OpenStreetMaps, which would have taken too much time for data processing. Instead, the street network was approximated by creating an artificial road network by linking nearby streets using the following method: For every street the nearest 25 streets were computed, while only every i*5-th (i < 25) nearest street was then actually connected in the road network. The idea for applying this method is that it counteracts the formation of disconnected clusters, such that only streets that are very close are connected to each other, while streets in farther distances can not be reached. Obviously, constructing an artificial road network like this will not yield an accurate or correct representation of the real street network, and may distort the results of prediction tasks when applied to Knowledge Graph Embeddings.
@@ -488,11 +242,21 @@ Based on those observations and the fact that the relationship between the road 
 *Graph visualization of the street network produced by the approximation method*
 
 ## 3. Data Integration
-For the integration to the Neo4J database a script 'main.py' which can be found in the folder '3_data_integration' was written which invokes the processing of all data in the form of csv files located in the '/data' folder.
+(LO 7)
+For the integration into the Neo4J database a script 'main.py' was written which can be found in the folder '3_data_integration'. It invokes the integration of all data (entities, relationships) in the form of csv files located in the '/data' folder.
 
-It starts with the deletion of the database and proceeds with the creation of all entities and nodes subsequently relationships. The implementation of those individual creation functions can be found in the file 'data_integration.py'.
+It starts with the deletion of the database and proceeds with the creation of all nodes and relationships. The implementation of those individual creation functions (CYPHER queries) can be found in the file 'data_integration.py'.
 
+<b>Note: The integration of the data to the database is only possible after data processing (2_data_processing) was finished. Furthermore, the Neo4J database must use the host address "bolt://localhost:7687" with the username "neo4j" and database "kgtransport" created.</b>
 
+<b>Note: Please disable authentication in NEO4J prior by setting: dbms.security.auth_enabled=false in the NEO4J configuration file.</b>
+
+<b>Note: A dump of the database can be found in the folder '/data_db_dump/neo4j.dump' and imported to Neo4J to skip all data processing / integration tasks</b>
+
+![Ontology_example_2](/documents/figures/app/neo4jdesktop.png)
+*Neo4J Browser after completed data integration*
+
+ 
 ## 4. Knowledge Graph Embeddings
 (LO1) To train the embedding model the Python library Pykeen (https://pykeen.github.io) was used. 
 
@@ -693,18 +457,13 @@ The model TransD is doing well in the category hits@10 where it is the second-be
 
 The model TransE performs averagely to below average in comparison to other models. One explaination for that could be that it does not support symmetric relationships which the relationship 'IS_CONNECTED' requires. Furthermore, it is not optimized for 1-to-N relationships which also may impacted the performance negatively.
 
-TransH is the second best performing model . The reason for the relatively good performance of TransH could be found in a large number of 1-to-N relationships in the KG and it is likely the single model with the ability to support the full feature set of relationship properties (Symmetry, Antisymmetry, Inversion, Composition, 1-to-N). However, models which are not known to support this property are seemingly performing well as well. 
+TransH is the second best performing model . The reason for the relatively good performance of TransH could be found in a large number of 1-to-N relationships in the KG and it is likely the single model with the ability to support the full feature set of relationship properties (Symmetry, Antisymmetry, Inversion, Composition, 1-to-N). However, models which are not known to support this property are seemingly performing well as well.
 
  TransE, TransD, TransH   Surprisingly, the model RotatE outperforms TransH even though the model is only known to be able to handle 1-to-N relationships rundimentally. ConvE yielded the least performing scores across all categories (hits@10, hits@3, hits@1, Mean Rank) . This could likely be the result of or the CNN of the model not capable to learn the characteristics of the dataset.    
 
 ConvE was the least performing model with lacking about 10% percentage to the best performing model. It seems likely that this model failed to learn the patterns of the dataset. This could either be due to incorrectly set hyperparameters or just the dataset lacking enough training data for the CNN to infer the concepts and characteristics of the dataset. ConvE also took the last place with regard to the time it took to train the model which however should not surprise since this CNNs are optimized to be executed on a GPU, and it was executed on the CPU for this exercise. It is however likely that, when executed on large KGs and optimized hardware, this model will outperform the others with regard to training time since it is easier to parallize which was also one of the major remarks in their paper.
 
 In general most models seem to perform relatively similarly in the categories (hits@10, hits@3) where the range of deviation is around 8-16% between the best and worst performing model.Tthe models seem to perform best with the number of epochs set in the range of around 200. However this varies between the different models and if head or tail prediction is applied. Without having relied on more in -depth analysis, for example a breakdown of the prediction accuracy for each relationship individually it is difficult to conclude that the support for relation properties (Symmetry, Antisymmetry, Inversion, Composition, 1-to-N) are the definite cause for performance of the models. Without having repeated the experiment multiple times or relied on cross validation for the model evaluation it may be that the results are the consequence of an unfavorable training/test data split for specific models. In conclusion RotatE performed the best in this experiment, but personally I think that the margin of error is likely too high to definitely conclude if a best performing model exists.
-
-
-# ffff
-
-At the first glance, the car velocities seem to be very slow with no street points measuring velocities above 18km/h compared to speed limits of up to 50km/ at certain street points. However, this is likely due to the mapping service sampling the velocities and thus returning the average velocity over a timeframe which is more in line of what was returned from the service. 
 
 ## Real world use-case evaluation
 (LO 9 / LO 11) In this segment the trained model is evaluated against scenarios that are more situated in the real world. While the models can perform well and achieve high scores in test settings, this may not translate well to the real-world. It could be the case that the models are perfectly capable to reason about some parts of the KG which however are not relevant for the tasks in the real-world. To verify the use-fulness of the models a few use-case scenarios are demonstrated by using the best-performing model "RotatE".
@@ -735,7 +494,7 @@ TransH is quite similar with regard to the predictions to TransD, however it mov
 The predictions by TransE are scattered across a larger spatial area, however they are still in the nearby viccinity and positioned on major roads, and thus within the range of plausibility. 
 ConvE's predictions are scattered widely across the entire city (Roßauer Brücke, Neubau Gürtel, Alser Strasse) and are thus very unplausible. One of those predicted location (Alser Strasse) resembles the almost exact position of a different TrafficIncident entity. ConvE was seemingly able to somehow detect and integrate that exact location in the predictions. Since ConvE concatenates embeddings of <head, relation> to an input matrix and subsequently uses convolution on it may have blurred the exact boundaries between the individual TrafficIncident entities and generalized the 'IS_NEARBY' relationship on the inputs of multiple different TrafficIncident entities. Furthermore the relatively low number of total Incidents (3) and low number of IS_NEARBY relationships (25) in the dataset (even though it generates negative samples I think) is also likely the cause for a rather disappointing result.
 
-It seems that the model RotatE does not only performs the best in the "synthetic benchmarks" in the training/test/evaluation split but also on this specific real-world scenario. Nevertheless, it should be mentioned that the meaningfulness of those results are limited since the KGE models in most cases never produce useful results when applied on other POIs/Roads/Incidents as shown in the second scenario:
+It seems that the model RotatE does not only perform the best in the "synthetic benchmarks" in the training/test/evaluation split but also on this specific real-world scenario. Nevertheless, it should be mentioned that the meaningfulness of those results are limited since the KGE models in most cases never produce useful results when applied on other POIs/Roads/Incidents as shown in the second scenario:
 
 ### Scenario 2:
 In this scenario, a similar scenario is applied that was presented by the paper from Tan et. al. to demonstrate how KGEs can forecast traffic outcomes given a specific time:
@@ -760,9 +519,8 @@ Given this result one might assume that the returned Road entities may indicate 
 Since no Traffic Speed entity was returned in combination with it, it is difficult to infer some semantic meaning (e.g. traffic speed at that time) behind it like it was in the paper by Tan et. al.. In my opinion even if it would have returned a traffic speed entity (e.g. 10km/h), it seems rather problematic just to assume a causality without any afterthoughts like done by the original authors. There could be various reasons behind the result of the study authors, for example as discussed in the segment before that certain models are not able to model specific relational properties (e.g. Symmetry, ...), or simply that the model was not properly trained, or that the results were just arbitrarily achieved.
 
 
-## Application Web UI / Backend
+## 5. Application Web UI / Backend
 In this segment the application UI / backend system that powers the KG is described and illlustrated. (LO9) (LO11)
-
 
 The frontend system (5_application/kg_webapp_webui) is implemented using Angular (https://angular.io) in conjunction with PrimeNG (https://primeng.org), NGX-MapboxGL (https://github.com/Wykks/ngx-mapbox-gl).
 
@@ -779,7 +537,7 @@ When viewing 'Streets' (when the according tab is selected) the user is able to 
 <img src="documents/figures/app/speed_filter.jpg"></img>
 <i>Connected entities to a selected entity can be displayed on the list view and the map view.</i>
 
-
+<b>A video was recorded to showcase the UI in more detail and can be acccessed under the following link: https://1drv.ms/v/s!ArwmJmwa307Zh7oFLptMgDeLRkbRsA?e=E4DM3V </b>
 
 The backend system (5_application/kg_webapp_backend) offers REST APIs via a Python Django backend. Each of the entities of the KGs were mapped using the Entitity Relationship Mapper Neomodel (https://neomodel.readthedocs.io/en/latest/). The system provides various REST APIs resembling the types of entities stored in the KG. The implementation is however limited to those types of entities that are actually used by the frontend:
 
@@ -795,92 +553,50 @@ The backend system (5_application/kg_webapp_backend) offers REST APIs via a Pyth
 It further supports predictions using the models trained from the chapter by loading the models located in the folder '4_kge/results/{Your Model Type}/trained_model.pkl'.
 I will not go too much further into detail with regard to the implementation since this is not really within the scope of this course, but rather belongs to a web engineering course. There are however still some bugs, where it may be necessary to refresh the web page entirely or some buttons have to clicked multiple times to trigger their action.  
 
-## Connections between KGs, ML and AI
-(LO12) Modern KG systems consist of multiple components that have their origins in other areas of computer science, such as database systems, AI, etc. However, while there are certainly overlaps to other areas these are not completely identical since KG systems have specific demands. For example to store the data in a KG, database systems must be used. Traditionally, KG systems do rely on graph-based database systems in contrast to relational, or document-based systems which are more commonly used in traditional software engineering. Those graph-based systems are often tailored to accomodate the needs of a KG, such as more convenient relational queries, the option to store semantic meaning (RDF), even with features such as in-built reasoners in for example GraphDB by Ontotext. 
-Similarly can be said about AI, where techniques from there are used in combination with KGs, such as Neural Networks. Techniques such as embeddings allowed the creation of KG-Embeddings which is itself a novel area and specifically tailored to be used in KGs. Traditional logic-based reasoners  derive information based on existing facts and relationships stored in the KG by using fixed rule-sets (e.g. first-order logic), while machine learning approaches are often using probabilistic methods. Hence, logic-based reasoner are better to derive information when logical consistency / correctness is required, however is lacking in areas when new information has to be derived from the KG which may not be explicitly modelled in the KG, besides from other different characteristics such as in runtime behaviour or the requirement for computation time when training machine learning models. Both techniques can be combined however, for example logic-based reasoners could be used to pre-filter data from the KG to reduce the input and hence the training size for machine-learning based reasoners. Or a logic-based filtering can be applied to the predictions of ML-reasoners afterwards to retrieve logically correct results. Knowledge Graph Embeddings, and Graph Neural Networks are the most commonly used ML techniques applied to KGs. As taught in the lecture, KG-Embeddings is based on transductive reasoning while Graph Neural Networks in contrast are based on inductive reasoning and hence capable of generalization. Through this GNNs are capable to operate on unseen nodes or edges, while KG-Embeddings need to be retrained for this use-case. Furthermore it embeds information of it's neighbourhood via message-passing and hence may be more suitable for tasks which involve the notion of spatiality. 
-Outside of AI, KG systems certainly do also have points of contact with other various areas in Computer Science as well such as in for example in Distributed Computing, or Business Intelligence where specialized techniques such as Stream Processing, Data Warehousing, Horizontal Scaling Techniques can be used to facilitate in preprocessing, maintainance and operation of KGs
+## 6: Learning Goals
+
+## 6.1 Logical Knowledge
+(LO 2) Logical queries can be implemented using Cypher. As part to fulfill this learning outcome few examples were implemented. Please refer to the chapter "LO 2" in the jupyter notebook '6_learning_goals/learning_goals.ipynb' for the concrete examples.
+
+
+## 6.2 Scalable Reasoning
+(LO 6)
+With regard to logical queries with the growth of the KG, the performance of CYPHER queries could pose a challenge in the future. Even now with the existing entities and relationships some queries already cause issues when executed without a limit of the number of returned entities. Besides the technique of limiting the number of returned entities and thus reducing the search space by terminating the query early, using the geospatial extension module (https://github.com/neo4j-contrib/spatial) could help with the performance of the queries since large portions of the KG possess geospatial coordinates and those could be indexed. However, it seems that this extension still lacks support for the newest version (v5) and does only support older versions. In addition, Neo4J supports common database scaling techniques by itself, such as sharding (https://neo4j.com/product/neo4j-graph-database/scalability/) where parts of the database is splitted on multiple servers. Furthermore, it is possible to setup read-replicas to make read queries faster.
+A different technique implemented outside of the DBMS could be to use a key, value store to pre-cache results of some special queries which may be accessed by the user frequently (e.g. Roads which are exceeding a certain traffic limits), and continue processing them by using those temporary results.
+
+In terms of the KG embeddings, since most KG embeddings are transductive and to my knowledge do not support incremental learning, scalability likely poses a big challenge when using a non-static KG which evolves over time like in this project where traffic data is being collected in 15 minute intervals. However, there is research under way and the paper "Lifelong Embedding Learning and Transfer for Growing Knowledge Graphs" by Cui et. al. introduces the "LKGE" (Lifelong Knowledge Graph Embedding) embedding model which takes existing embeddings and fits them to new unseen KG data by using an autoencoder. For now being, the optimal solution is likely to train KGE using snapshots of the KG at specific times, and update the model in a periodical time-frame or when necessary. One issue with this concept however is that with the growth of the KG the time required to train the KGEs is going to increase. To combat this issue it would be possible to purge the KG from all data that is not necessary for the inference tasks, such as certain POI categories for example, or data that is already too old, hence reducing the size of the datasets used for the training of the KGE models.
+
+
+## 6.3 Knowledge Graph Evolution
+
+(LO 8) One of the challenging tasks of KG resembles KG completion where missing links or entities are predicted using either logical queries, or machine learning based approaches such as GNNs or KGEs.
+
+As already pointed out in chapter 4, the KGEs trained as part of this project are of limited use, and hence are not really suitable for adding missing links or creating new entities. Since one of the techniques outlined in the lecture was recursion, a cypher query of this type was implemented to create the new relationship 'IS_REACHABLE' (in Red).
+
+This new relationship indicates whether two POIs can be reached by each other using a transportation mean. Since the KG of this project only models the road network and all POIs have access to roads, the results of this query will be trivial since all Roads are connected to each other directly or via detours. However, in a more practical setting where the KG contains multi-modal transit data, e.g. public transit, this query could be useful, to quickly decide which venues can be reached via public transit.
+
+<img src="documents/figures/lo8_recursive.png"></img>
+
+For the implementation of those recursive queries in CYPHER, and their results please refer to the Jupyter Notebook:
+ '6_learning_goals/6_learning_goals.ipynb'
+
+Aside from KG completion through, link and entity prediction, a KG can be expanded by adding additional data. For example in this project, data of a transit network is missing. In our case the addition of those data would not resemble a huge issue, since there would not be really a significant overlap between the existing KG and the new data. However, one would have to do data-processing / data-transformation to dismiss unnecessary attributes and entities from the datasets. Furthermore, duplicates must be identified and merged, since some of the POI nodes are in fact train/bus stations. In my opinion, no advanced methods as introduced by the lecture like modifying an inheritance structure would be necessary. But if they are necessary, RDF/OWL-based technologies would have an upper-hand since the notion of inheritance is not necessary modelled in Neo4J, it would be more laborious to automate the entire migration.
+
+Another aspect of KG evolution resembles the maintainance, and up-keeping of the existing data. The current KG is time-dependent and models traffic data in 20 minute intervals. If operated as a continous service, a lot of data would be collected, and may even be out-dated over the time. To remove unnecessary parts of the KG, for example logical queries can be applied to remove data which are exceeding a certain age.  
+
+An example query which removes parts of the KG modelling the date of the date is given in the Jupyter notebook '6_learning_goals/learning_goals.ipynb'
+
+## 6.4 Connections between KGs, ML and AI
+(LO12) Modern KG systems consist of multiple components that have their origins in other areas of computer science, such as database systems, AI, etc. However, while there are certainly overlaps to other areas these are not completely identical since KG systems have specific demands. For example, to store the data in a KG, database systems must be used. Traditionally, KG systems do rely on graph-based database systems in contrast to relational, or document-based systems which are more commonly used in traditional software engineering. Those graph-based systems are often tailored to accommodate the needs of a KG, such as more convenient relational queries, the option to store semantic meaning (RDF), even with features such as in-built reasoners in for example GraphDB by Ontotext. 
+Similarly can be said about AI, where techniques from there are used in combination with KGs, such as Neural Networks. Techniques such as embeddings allowed the creation of KG-Embeddings which is itself a novel area and specifically tailored to be used in KGs. Traditional logic-based reasoners  derive information based on existing facts and relationships stored in the KG by using fixed rule-sets (e.g. first-order logic), while machine learning approaches are often using probabilistic methods. Hence, logic-based reasoners are better to derive information when logical consistency / correctness is required, however is lacking in areas when new information has to be derived from the KG which may not be explicitly modelled in the KG, besides from other different characteristics such as in runtime behaviour or the requirement for computation time when training machine learning models. Both techniques can be combined however, for example logic-based reasoners could be used to pre-filter data from the KG to reduce the input and hence the training size for machine-learning based reasoners. Or a logic-based filtering can be applied to the predictions of ML-reasoners afterwards to retrieve logically correct results. Knowledge Graph Embeddings, and Graph Neural Networks are the most commonly used ML techniques applied to KGs. As taught in the lecture, KG-Embeddings is based on transductive reasoning while Graph Neural Networks in contrast are based on inductive reasoning and hence capable of generalization. Through this GNNs are capable of operating on unseen nodes or edges, while KG-Embeddings need to be retrained for this use-case. Furthermore, it embeds information of it's neighbourhood via message-passing and hence may be more suitable for tasks which involve the notion of spatiality. 
+Outside of AI, KG systems certainly do also have points of contact with other various areas in Computer Science as well such as in for example in Distributed Computing, or Business Intelligence where specialized techniques such as Stream Processing, Data Warehousing, and Horizontal Scaling Techniques can be used to facilitate in preprocessing, maintainance and operation of KGs
 Each technology comes with it's own advantages and disadvantages, and their own set of ideal use-cases. For example as was showcased in this project, KG embeddings seem to not really work well on link prediction when used for forecasting the traffic volume in a time-dependent setting. For that traditional GNN, or CNN-based models are likely better suited for those tasks.
 In short, KG systems are not entirely made up from AI, however since there are currently many innovations happening in AI which enable novel techniques and hence use-cases, such as KG-Embeddings, it may seem that KGs are an area of AI.
 
-## Technical Architecture
+## 7 Conclusion
+In conclusion this project demonstrated that the results of the study from Tan et. al. could not be replicated on the city of vienna by constructing a similar KG proposed like in their study. However, since the datasets have different characteristics (lower number of entities / relatinships in my project) the meaningfulness of the findings are limited. Since Knowledge Graph Embeddings do not really embed information from their neighbourhoods unlike GNNs, it was observed that while KGEs were performing well on 'synthetic' benchmarks, using the hold-out method on the existing KG, most predictions do not provide a lot of value in the real-world. Especially in the task of predicting the traffic speeds on specific roads it was observed that KGE performed quite bad. For one the reason could be found in the faulty modelling of time in the KG, and the lacking support of the notion of time in traditional KGEs. There are temperoal models like t-transE, however those models still do not provide an easy to use interface and are difficult to integrate into projects, like the library PyKEEN. On the other hand, KG-Embeddings do not provide the support to encode or learn spatial and temporal features well unlike GNNs which seemingly work well in this particular task, like outlined in the paper "Spatio-Temporal Graph Convolutional Networks: A Deep Learning Framework
+for Traffic Forecasting" by Yu et. al. (https://www.ijcai.org/proceedings/2018/0505.pdf)
 
-The technologies used for this project consist of the following:
+On hindsight it would have been likely more interesting to explore the concepts of Graph Neural Networks a little bit more, and to have a comparison of those with Knowledge Graph Embeddings rather than implementing a Web UI, since those things are already taught in other courses, but due to time reasons was dismissed.
 
-* NestJS/Node.js for data crawling from REST APIs
-* Python/Pandas for transforming the crawled data to a suitable format
-* Neo4J as graph database
-* PyKeen for training Knowledge Graph Embedding models
-* Web UI using Angular with a Django backend
-
-## Open questions:
-* How to factor in that streets have different traffic volume capacities (e.g. streets with single lanes / multiple lanes)
-* How do you know that people are not just passing by ?
-
-
-
-## Learning Goals
-
-Representations
-
-(LO1) Understand and apply Knowledge Graph Embeddings
-
-Knowledge Graph Embeddings (KGEs) are a large field of representations and techniques focused on a shared principle: how to represent of symbolic knowledge - as in typical databases or datasets (in our case, graphs) - in a sub-symbolic way - as in typical machine learning or deep learning scenarios (in our case, as vectors). We will cover the principles as well as selected seminal and recent KGE models such as the translation-based TransE, the semantic matching-based ComplEx, and the neural network-based ConvE.
-
-In this project
-
-(LO2) Understand and apply logical knowledge
-
-Logical knowledge representation is a broad traditional field of AI techniques rooted across many communities, including of course the knowledge representation and reasoning, databases, semantic web and other communities. As this aspect is covered in many courses, we will focus on (1) giving a short introduction, (2) show connections between the slightly different frameworks used by different communities and (3) focus on an aspect particularly relevant for Knowledge Graphs: how to represent logical knowledge that uses (i) full recursion - as needed by graph processing - and (ii) powerful object creation (existential quantification in logic terms) – as needed to discover unknown parts of a Knowledge Graph.
-
-As the designed system uses a Neo4J database logical queries can be implemented using Cypher queries. As an example a user can look up the shortest path . Another interesting use case would be to look up which streets are commonly exceeding speed limits.
-
-(LO3) Understand and apply Graph Neural Networks
-
-Graph Neural Networks (GNNs) are a rapidly-growing field - successfully applied in many applications – based on a very clear idea: can the structure of the graph (i.e., the symbolic world) be used as the structure of an artificial neural network (ANN) as in typical machine learning and deep learning scenarios. We will cover the principles as well as selected models. The goal is to understand how machine learning and deep learning models based on neural networks can be guided by graph data and knowledge.
-
-(LO4) Compare different Knowledge Graph data models from the database, semantic web, machine learning and data science communities.
-
-KGEs, logical models and GNNs are ways of representing different forms of knowledge in a Knowledge Graph, and thus naturally need to talk about different data models that they are based on. In this part, we will dig deeper into different concrete data models of representing graphs and Knowledge Graphs. One particular focus will be temporal models for Knowledge Graphs. We will give brief overviews of data models from the database, Semantic Web and other communities, and will give pointers to courses that give more details on each of them.
-Systems
-
-(LO5) Design and implement architectures of a Knowledge Graph
-
-Designing an IT architecture for any complex AI applications is a challenge, typically requiring to integrate a number of technologies. In this part, we will consider different technology stacks available for Knowledge Graphs, and how to decide which capabilities should be handled by which parts of the architecture. This includes topics such as storing large Knowledge Graphs, and the border between what the Knowledge Graph should handle and what external application code should handle. As a main example, we are going to use the Vadalog system and architecture developed at the University of Oxford together with TU Wien, the Central Bank of Italy and many others. For technology stacks covered in detail by other courses, we will stay high level here and give pointers.
-
-(LO6) Describe and apply scalable reasoning methods in Knowledge Graphs
-
-While storing Knowledge Graphs is an important endeavour in itself, using it to derive new data, insights or other output, is a central service offered by a Knowledge Graph. Typically, for simple questions this is called querying, and for more complex questions and if it requires background knowledge, reasoning. Reasoning is a broad area, and in this part, we will focus on the representations and models most important for Knowledge Graphs: reasoning with KG Embeddings, logical knowledge that allows both full recursion as well as object creation, as well as Graph Neural Networks. We will also consider what it means to reason by combining these aspects.
-
-In terms of the KG embeddings, since most KG embeddings are transductive and to my knowledge do not support incremental learning, scalability likely poses a big challenge when using a non-static KG which evolves over time, such as in this submission project a KG capturing traffic data. However there is research under way and the paper "Lifelong Embedding Learning and Transfer for Growing Knowledge Graphs" by Cui et. al. introduces the "LKGE" (Lifelong Knowledge Graph Embedding) embedding model which takes existing embeddings and fits them to new unseen KG data by using an autoencoder. For now being, the optimal solution is likely to train KGE using snapshots of the KG at specific times, and update the model in a periodical time-frame or when necessary. 
-
-With the current KG schema design the modelling of time poses a great issue in terms of scalability, since for each unit of time a new node / entitiy, in addition to it's relationships to other entities, has to be introduced to the graph. This will result in the KG being bloated with nodes containing time units, likely taking the majority of all entities / relationships in the graph database. A more efficient way to store time would be to introduce concepts like time-trees where not the entire datetime timestamp is stored as a single node, but is split into multiple nodes for each day, month, year, hour and minute unit, and a time representation is then assembled by connecting those units of time.
-
-
-(LO7) Apply a system to create a Knowledge Graph
-
-In this part, we are going to look at the first part of the Knowledge Graph lifecycle, namely creation. We will give a broad overview of available techniques with some pointers for further information. For Knowledge Graphs this topic includes schema mapping – with many classical techniques stemming from the database community on data exchange and integration, and record linkage, which typically includes an ensemble of Machine Learning methods. These topics will be covered as far as needed for giving a full picture of the KG lifecycle, and connections to other courses will be highlighted.
-
-(LO8) Apply a system to evolve a Knowledge Graph
-
-Evolving a Knowledge Graph is a broad topic, and we are going to cover a representative selection of techniques here. In general, it can be divided into two areas: (i) Knowledge Graph completion (i.e., adding to it). We will here discuss link prediction as a central method, in particular including KG Embeddings as well as logic based reasoning with full recursion and existential quantification. We are also going to discuss how to add knowledge to a KG through techniques such as rule learning or model induction. (ii) Knowledge Graph cleaning (i.e. removing parts of a KG) which can either effect the data or knowledge stored in a KG. This is of course broader, and can include topics such as schema evolution, view maintenance, etc. We will provide a broad picture and pointers for further topics covered in other courses.
-Applications
-
-(LO9) Describe and design real-world applications of Knowledge Graphs
-
-Systems and representations are central to this course, but hardly motivated without applications. We will give a broad coverage of real-world applications in many sectors, including: the finance sector, energy sector, logistics and supply chain sector, manufacturing sector, aerospace sector and many others. Our goal is to explore the actual real-world applications of Knowledge Graphs, and learn from them which parts of the broad field of KG techniques are used where, and how to use this for designing such data science and computer science applications ourselves.
-
-In this project a custom road network knowledge graph was created. The aim of this project was to enable traffic planners or other specialists to see or explore relationships between certain POIs (Points of Interests), street points and road traffic data points. For that data from various datasources were acquired: 1. Foursquare API for POIs, 2. OpenWeatherMap for weather data (temperature / weather condition), 3. HERE Maps API for modelling the road network, as well as road incidents (car accidents / road blocks), and car traffic volume in the form of the average traffic speed. 
-
-
-(LO11) Apply a system to provide services through a Knowledge Graph
-
-As a final step of creating and then involving a KG, we here give a glimpse into the finale step, namely services that can be provided through Knowledge Graphs. This will necessarily be just an overview, as many AI-based services today use one or more Knowledge Graphs. The typical services that information systems in general provide are in terms of general-purpose or broad analytics provided to a user, or in terms of specific queries or questions asked to a system. While we are point to a specific courses here for more details, we will give a broad overview of how to build structured query interfaces for KG queries and analytics, visualize Knowledge Graphs, build natural language query interfaces for complex KG queries and questions, and build KG-based recommender systems that use deep logic and KGE-based knowledge. In all of these, we will focus on the KG aspects, seeing how in particular a KG is used to support these services. Our goal is here not to understand visualization, recommender systems, etc. – there are specific courses for that – but to understand how an architecture that includes KGs works, and how KGs specifically help these services.
-
-(LO12) Describe the connections between Knowledge Graphs (KGs), Machine Learning (ML) and Artificial Intelligence (AI)
-
-It is clear that Knowledge Graphs are an area of Artificial Intelligence where a number of techniques come together, and where new Machine Learning techniques such as KG Embeddings native to KGs have emergence. Arguably, it is one of the strengths of KG-based systems to allow all such techniques to come together in a well-organized architecture (some call it a “melting pot”). Yet, is all of KGs Artificial Intelligence? What about database systems and highly-scalable data processing techniques? A particularly interesting angle here are the reasoning techniques: How are traditional logic-based reasoning techniques coming together with Machine Learning-based ones? What is the connection to Neural Network-based methods, in particular those where the KG plays a central role (such as in GNNs)? These are questions we will openly consider in this part to allow everyone to not only understand the individual techniques, but how they connect to each other in KGs.
-
-
-
-
-On hindsight it would have been more interesting to explore the GNN-side, and to have a comparison with knowledge graph embeddings in this project.
+All in all a prototype KG application including a Web UI was developed to showcase how such an application could be used in the real-world.
